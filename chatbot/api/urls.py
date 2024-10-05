@@ -1,6 +1,9 @@
+from django.contrib import admin
 from django.urls import path
-# from .views import 
+
+from .views import getUser, getUserForId
 
 urlpatterns = [
-    # path('', ),
+    path('',getUser),
+    path('<int:id>/',getUserForId),
 ]
