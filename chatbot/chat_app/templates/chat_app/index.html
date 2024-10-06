@@ -1,0 +1,103 @@
+{% comment %} 채팅 메시지 입출력에 대한 테스트 코드입니다. {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>챗봇</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+        }
+        .bot-message {
+            text-align: left;
+            color: green;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>챗봇</h1>
+<div id="chat-box"></div>
+<input type="text" id="user-input" placeholder="메시지를 입력하세요..." />
+<button id="send-button">전송</button>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+
+    sendButton.addEventListener('click', () => {
+        const message = userInput.value;
+        if (message.trim() === '') return;
+
+        // 사용자 메시지 표시
+        displayMessage(message, 'user');
+        userInput.value = '';
+
+        // 서버에 메시지 전송
+        fetch('http://localhost:8000/api/messages/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chatroom: 1,  // 사용할 채팅방 ID (예시)
+                sender: 'user',
+                text: message,
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('네트워크 오류가 발생했습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 봇의 응답 메시지 표시
+            displayMessage(data.text, 'bot');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            displayMessage('오류가 발생했습니다.', 'bot');
+        });
+    });
+
+    function displayMessage(message, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+        messageElement.textContent = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;  // 스크롤을 맨 아래로 이동
+    }
+</script>
+
+</body>
+</html>
