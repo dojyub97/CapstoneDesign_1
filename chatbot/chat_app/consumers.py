@@ -1,5 +1,5 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 ###########################gemini api를 쓰기 위한 위한 설정
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -18,16 +18,16 @@ chain = prompt | llm | output_parser
 ##############################gemini api를 쓰기 위한 위한 설정
 
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.accept()
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
 
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         pass
 
-    def receive(self, text_data):
+    async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
-        response = chain.invoke({"input" : message })
+        response = await chain.ainvoke({"input" : message })
 
-        self.send(text_data=json.dumps({"message": response + "\n"}))
+        await self.send(text_data=json.dumps({"message": response + "\n"}))
