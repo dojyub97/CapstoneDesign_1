@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,python,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,python,windows
 
+#djy_chat에서 문제될 수 있는 부분
+chat_app/templates/chat_app/index.html
+chat_app/consumers.py
+
 ### Django ###
 *.log
 *.pot
