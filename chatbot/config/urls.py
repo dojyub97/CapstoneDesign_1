@@ -20,6 +20,6 @@ from chat_app.views import chatbot_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  #API endpoint
+    # path('api/', include('api.urls')),  #API endpoint
     path('chat/',chatbot_view, name='chatbot'),
 ]

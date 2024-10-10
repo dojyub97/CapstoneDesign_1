@@ -4,7 +4,7 @@ from django.conf import settings
 def query_gemini_api(user_message):
     url = "https://api.example.com/gemini"  # 실제 Google Gemini API 엔드포인트로 변경해야 함
     headers = {
-        "Authorization": f"Bearer {settings.GOOGLE_GEMINI_API_KEY}",
+        "Authorization": f"Bearer {settings.GOOGLE_API_KEY}",
         "Content-Type": "application/json",
     }
     data = {

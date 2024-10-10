@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api',
+    # 'rest_framework.authtoken',
+    # 'api',
     'rest_framework',
     'chat_app',
 ]
+
+LOGIN_URL="/admin/login/"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -106,6 +109,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK={
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework.authentication.TokenAuthentication',
+        ]
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class User(models.Model):
@@ -21,11 +22,15 @@ class ChatRoom(models.Model):
     topic=models.CharField(max_length=20, choices=TOPIC_CHOICES)
     
 class ChatMessage(models.Model):
-    chatroom=models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    chatroom=models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages', null=True)
+    
     sender_choices=[
         ('user','사용자'),
         ('system','시스템'),
     ]
     sender=models.CharField(max_length=10, choices=sender_choices)
-    text=models.TextField()
-    created_at=models.DateTimeField(auto_now_add=True)
+    gemini_output=models.TextField(null=True, blank=True)
+    created_at=models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    
+    def __str__(self):
+        return self.sender
