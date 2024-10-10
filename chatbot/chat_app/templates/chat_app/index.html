@@ -53,6 +53,13 @@
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
 
+    //웹소켓 라우팅(?) 설정
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+    );
+
     sendButton.addEventListener('click', () => {
         const message = userInput.value;
         if (message.trim() === '') return;
@@ -61,34 +68,17 @@
         displayMessage(message, 'user');
         userInput.value = '';
 
-        // 서버에 메시지 전송
-        fetch('http://localhost:8000/api/messages/', {
-            mode: 'no-cors'
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chatroom: 1,  // 사용할 채팅방 ID (예시)
-                sender: 'user',
-                text: message,
-            }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('네트워크 오류가 발생했습니다.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 봇의 응답 메시지 표시
-            displayMessage(data.text, 'bot');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            displayMessage('오류가 발생했습니다.', 'bot');
-        });
+        // 서버에 메시지 전송 
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
     });
+       
+        
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        displayMessage(data.message, 'bot');  // 봇의 응답 메시지 표시
+    };
 
     function displayMessage(message, sender) {
         const messageElement = document.createElement('div');
