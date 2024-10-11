@@ -79,12 +79,8 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=GEMINI_API_KEY #인증오류관련
 )
 def generate_response(user_question):
-    print_intro_message()
+    #print_intro_message()
 
-    full_prompt = base_prompt + few_shot_examples + [{"role": "user", "content": user_question}]
+    full_prompt = base_prompt + few_shot_examples
     response = llm.invoke(full_prompt)
-    print(response.content) #터미널에 출력
     return response.content
-
-user_question = "공부할 때 집중력을 유지하는 방법은 무엇인가요?" #더미데이터, 유저의 질문을 서버로부터 받아와야함
-generate_response(user_question)
