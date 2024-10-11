@@ -1,12 +1,6 @@
-from django.contrib import admin
 from django.urls import path
-from rest_framework.routers import DefaultRouter
-from .views import getUser, getUserForId
+from .views import chatbot_view
 
-router=DefaultRouter()
-#views에 대한 router 등록
-#router.register(r'users',)
 urlpatterns = [
-    path('chat_app/login'),
-    path('chat_app/chat/<int:pk>')
+    path('dash/', chatbot_view,name='chat_view'),   # Dash 앱을 위한 Django view
 ]
