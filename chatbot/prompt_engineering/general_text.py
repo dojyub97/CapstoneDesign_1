@@ -81,6 +81,6 @@ llm = ChatGoogleGenerativeAI(
 def generate_response(user_question):
     #print_intro_message()
 
-    full_prompt = base_prompt + few_shot_examples
+    full_prompt = base_prompt + few_shot_examples + [{"role": "user", "content": user_question}]
     response = llm.invoke(full_prompt)
     return response.content
