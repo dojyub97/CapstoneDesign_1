@@ -28,7 +28,7 @@ async def send_message(message):
     Input('submit-button', 'n_clicks'),
     Input('input-message', 'value')
 )
-\
+
 def update_output(n_clicks, value):
     if n_clicks is None or not value:
         return '메시지를 입력하세요!'
@@ -42,8 +42,4 @@ def update_output(n_clicks, value):
 
 # Create your views here.
 def chatbot_view(request):
-<<<<<<< HEAD
     return render(request, 'chat_app/index.html')
-=======
-    return render(request, 'chat_app/index.html')
->>>>>>> 5a798284f815c9d4306c41787b07302f0c938a2e
