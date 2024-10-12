@@ -46,13 +46,21 @@ few_shot_examples = [
         )
     }
 ]
+# 환경 변수에서 API 키를 읽어옴
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 환경 변수를 잘 가져왔는지 확인
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
+
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
-    max_tokens=300,
+    max_tokens=200,
     timeout=30,
-    max_retries=2
+    max_retries=2,
+    google_api_key=GEMINI_API_KEY #인증오류관련
 )
 
 def generate_response(user_question, pinecone_data):

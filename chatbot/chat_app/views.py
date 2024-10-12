@@ -28,7 +28,7 @@ async def send_message(message):
     Input('submit-button', 'n_clicks'),
     Input('input-message', 'value')
 )
-\
+
 def update_output(n_clicks, value):
     if n_clicks is None or not value:
         return '메시지를 입력하세요!'
