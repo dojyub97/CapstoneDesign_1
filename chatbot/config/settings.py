@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'chat_app',
     'django_plotly_dash',
+    'corsheaders',
 ]
 
 LOGIN_URL="/admin/login/"
