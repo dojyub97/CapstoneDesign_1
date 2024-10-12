@@ -42,4 +42,8 @@ def update_output(n_clicks, value):
 
 # Create your views here.
 def chatbot_view(request):
+<<<<<<< HEAD
     return render(request, 'chat_app/index.html')
+=======
+    return render(request, 'chat_app/index.html')
+>>>>>>> 5a798284f815c9d4306c41787b07302f0c938a2e

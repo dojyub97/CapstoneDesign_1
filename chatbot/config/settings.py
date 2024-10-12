@@ -27,13 +27,10 @@ SECRET_KEY = 'django-insecure-!tlhgzc3lh0cptzagc*+*y0*p5!*vk(ua%+ovvnk15*2jincoy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
+ALLOWED_HOSTS = [ 
     'localhost',
     '127.0.0.1',
-    'chatbotdemo.com',
-]
-
-# GOOGLE_GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
+    'chatbotdemo.com',]
 
 # Application definition
 
@@ -62,6 +59,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS=[
+    'http://localhost:8000',
+    'https://chatbotdemo.com',
 ]
 
 ROOT_URLCONF = 'config.urls'
