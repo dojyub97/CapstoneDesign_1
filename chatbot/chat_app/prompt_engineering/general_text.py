@@ -1,4 +1,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def print_intro_message():
     print("일반 질문 탭입니다. 어떤 것이 궁금한가요? 무엇이든 질문해주세요.")
@@ -59,20 +62,25 @@ few_shot_examples = [
     }
 ]
 
+# 환경 변수에서 API 키를 읽어옴
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 환경 변수를 잘 가져왔는지 확인
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
+
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
     max_tokens=200,
     timeout=30,
-    max_retries=2
+    max_retries=2,
+    google_api_key=GEMINI_API_KEY #인증오류관련
 )
-
 def generate_response(user_question):
-    print_intro_message()
+    #print_intro_message()
 
     full_prompt = base_prompt + few_shot_examples + [{"role": "user", "content": user_question}]
     response = llm.invoke(full_prompt)
-    print(response.content) #터미널에 출력
-
-user_question = "공부할 때 집중력을 유지하는 방법은 무엇인가요?" #더미데이터, 유저의 질문을 서버로부터 받아와야함
-generate_response(user_question)
+    return response.content

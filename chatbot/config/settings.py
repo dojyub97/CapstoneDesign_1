@@ -27,13 +27,15 @@ SECRET_KEY = 'django-insecure-!tlhgzc3lh0cptzagc*+*y0*p5!*vk(ua%+ovvnk15*2jincoy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-# GOOGLE_GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
+ALLOWED_HOSTS = [ 
+    'localhost',
+    '127.0.0.1',
+    'chatbotdemo.com',]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,10 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'rest_framework.authtoken',
     # 'api',
     'rest_framework',
     'chat_app',
+    'django_plotly_dash',
 ]
 
 LOGIN_URL="/admin/login/"
@@ -57,6 +59,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS=[
+    'http://localhost:8000',
+    'https://chatbotdemo.com',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -112,6 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK={
         'DEFAULT_AUTHENTICATION_CLASSES': [
             'rest_framework.authentication.TokenAuthentication',
+            'rest_framework.permissions.AllowAny',
         ]
 }
 
@@ -137,4 +146,4 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ASGI_APPLICATION = "config.asgi.application"
+ASGI_APPLICATION = 'config.asgi.application'

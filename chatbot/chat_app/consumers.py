@@ -1,6 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from prompt_engineering import general_text
+from .prompt_engineering import general_text
 
 
 class ChatConsumer(AsyncWebsocketConsumer):

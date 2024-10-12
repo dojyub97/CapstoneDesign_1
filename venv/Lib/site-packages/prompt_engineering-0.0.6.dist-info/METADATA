@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: prompt-engineering
+Version: 0.0.6
+Summary: abstraction for language model priming / prompt engineering
+Home-page: UNKNOWN
+Author: Mohammed Terry-Jack
+Author-email: <mohammedterryjack@gmail.com>
+License: UNKNOWN
+Keywords: python,priming,prompts,gpt3,gptj
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: MacOS :: MacOS X
+Description-Content-Type: text/markdown
+
+Ready made prompts for GPT3 or create your own in seconds
+
