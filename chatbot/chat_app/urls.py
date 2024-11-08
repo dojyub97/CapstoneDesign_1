@@ -1,6 +1,11 @@
 from django.urls import path
-from .views import chatbot_view
+from .views import *
+
+app_name='chat_app'
 
 urlpatterns = [
-    path('chat/', chatbot_view,name='chat_view'),   # Dash 앱을 위한 Django view
+    path('', main_view, name='main'),              
+    path('login/', login_view, name='login'),      
+    path('signup/', signup_view, name='signUp'),   
+    path('chatbot/', chatbot_view, name='chatbot') 
 ]

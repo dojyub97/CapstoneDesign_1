@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'chat_app/style.css' %}"> <!-- CSS 연결 -->
+    <link rel="stylesheet" href="{% static 'chat_app/css/chatbot.css' %}"> <!-- CSS 연결 -->
     <title>챗봇 인터페이스</title>
 </head>
 <body>
@@ -15,8 +15,7 @@
     <div class="header">
         <h1>챗봇 인터페이스</h1>
         <div class="nav-buttons">
-            <button class="btn btn-login">Sign in</button>
-            <button class="btn btn-register">Register</button>
+            <button id="logout-button" class="btn btn-logout">Logout</button>
         </div>
     </div>
 
@@ -47,6 +46,6 @@
         </div>
     </div>
 
-    <script src="{% static 'chat_app/script.js' %}"></script> <!-- JavaScript 연결 -->
+    <script src="{% static 'chat_app/js/chatbotEvent.js' %}"></script> <!-- JavaScript 연결 -->
 </body>
 </html>

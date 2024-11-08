@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="{% static 'chat_app/css/main.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">Logo</div>
+        <nav>
+            <a href="{% url 'chat_app:signUp' %}" class="btn">회원가입</a>
+            <a href="{% url 'chat_app:login' %}" class="btn">로그인</a>
+        </nav>
+    </header>
+
+    <!-- Main Banner Section -->
+    <section class="banner"></section>
+
+    <!-- Content Section -->
+    <section class="content">
+        <h3>Heading</h3>
+        <p>Section description...</p>
+        <div class="gallery">
+            <!-- Repeatable content box -->
+            <div class="content-box">
+                <blockquote>"Quote"</blockquote>
+                <p>Title</p>
+                <small>Developer name</small>
+            </div>
+            <!-- Repeat for other content boxes -->
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">User assets</div>
+            <div class="footer-section">Explore</div>
+            <div class="footer-section">Resources</div>
+        </div>
+    </footer>
+
+    <!-- Fixed Chat Button -->
+    <button id="chat-button" onclick="goToChatPage()">Chat</button>
+
+    <script src="{% static 'chat_app/js/mainEvent.js' %}"></script>
+</body>
+</html>

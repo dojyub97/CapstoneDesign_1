@@ -10,6 +10,7 @@ def query_gemini_api(user_message):
     data = {
         "query": user_message,
         # 필요에 따라 추가 데이터
+        "messages":[{"role":"user","content":user_message}]
     }
     
     response = requests.post(url, headers=headers, json=data)
@@ -17,7 +18,7 @@ def query_gemini_api(user_message):
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
-        return response.json()  # JSON 응답 반환
+        return response.json()["choices"][0]["message"]["content"]  # JSON 응답 반환
     except requests.exceptions.RequestException as e:
         # 로깅 또는 오류 처리
         print(f"Error querying Google Gemini API: {e}")
