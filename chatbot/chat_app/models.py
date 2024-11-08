@@ -1,36 +1,53 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Create your models here.
-class User(models.Model):
-    password=models.CharField(max_length=128)
-    user_name=models.CharField(max_length=100)
-    
+class UserManager(BaseUserManager):
+    def create_user(self, user_name, password=None):
+        if not user_name:
+            raise ValueError("The user must have a username")
+        
+        user = self.model(user_name=user_name)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+class User(AbstractBaseUser):
+    user_name = models.CharField(max_length=100, unique=True)
+    password = models.CharField(max_length=128)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'user_name'
+
     def __str__(self):
         return self.user_name
-    
 class ChatRoom(models.Model):
-    TOPIC_CHOICES=[
-        ('school_info', '학교정보'),
-        ('pdf_questions','교재관련질문'),
-        ('QnA','예상문제')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chatroom')
+    chatroom_title = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    topic_choices = [
+        ('학교정보', '학교정보'),
+        ('pdf관련질문', 'pdf관련질문'),
+        ('예상문제', '예상문제'),
     ]
-    
-    user=models.ForeignKey(User, on_delete=models.CASCADE, related_name='chatrooms')
-    chatroom_title=models.CharField(max_length=100, null=True, blank=True)
-    created_at=models.DateTimeField(auto_now_add=True)
-    topic=models.CharField(max_length=20, choices=TOPIC_CHOICES)
-    
+    topic = models.CharField(max_length=50, choices=topic_choices, null=False)
+
 class ChatMessage(models.Model):
-    chatroom=models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages', null=True)
-    
-    sender_choices=[
-        ('user','사용자'),
-        ('system','시스템'),
+    chatroom_id = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    sender_choices = [
+        ('user', '사용자'),
+        ('system', '시스템'),
     ]
-    sender=models.CharField(max_length=10, choices=sender_choices)
-    gemini_output=models.TextField(null=True, blank=True)
-    created_at=models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    
+    sender = models.CharField(max_length=10, choices=sender_choices)
+    text = models.TextField(null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return self.sender
+    
+
+# class File(models.Model):
+#     chatroom=models.ForeignKey(User,on_delete=models.CASCADE)
+#     file_name=models.CharField(max_length=255)
+#     content=models.BinaryField()

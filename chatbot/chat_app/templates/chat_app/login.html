@@ -1,0 +1,29 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'chat_app/css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <p id="error-message" class="error-message" style="display: none;">가입되지 않은 사용자입니다.</p>
+        <form id="login-form">
+            <div class="input-container">
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+            <div class="input-container">
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="login-button">Log In</button>
+        </form>
+        <p class="signup-link">Don’t have an account? <a href="{% url 'chat_app:signUp' %}">Signup Now</a></p>
+    </div>
+
+    <script src="{% static 'chat_app//js/loginEvent.js' %}"></script>
+</body>
+</html>

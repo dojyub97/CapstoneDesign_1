@@ -1,7 +1,12 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
-from .views import RegisterView, getUser, getUserForId
+from .views import *
+
+app_name='api'
 
 urlpatterns = [
-    path('register/', RegisterView.as_view()),
+    path('signup/',SignUpView.as_view(),name='signup'),
+    path('login/',LoginView.as_view(),name='login'),
+    path('logout/',LogoutView.as_view(),name='logout'),
+    path('chatroom/',ChatRoomView.as_view(),name='chatroom'),
+    path('chatroom/<int:chatroom_id>/',ChatMessageView.as_view(),name='chatting'),
 ]

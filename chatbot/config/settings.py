@@ -32,6 +32,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'chatbotdemo.com',]
 
+AUTH_USER_MODEL = 'chat_app.User'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,10 +46,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'api',
+    'api',
     'rest_framework',
     'chat_app',
     'django_plotly_dash',
+    'rest_framework.authtoken'
 ]
 
 LOGIN_URL="/admin/login/"
@@ -65,8 +68,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS=[
     'http://localhost:8000',
-    'https://chatbotdemo.com',
+    'https://chatbotdemo.',
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'config.urls'
 
