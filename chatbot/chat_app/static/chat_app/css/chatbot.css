@@ -85,6 +85,20 @@ body {
     margin-left: 300px; /* 사이드바가 열릴 때 채팅 컨테이너 이동 */
 }
 
+.chatroom-btn {
+    background-color: #A6A8AB;
+    color: #252233;
+    margin: 10px 0;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+.chatroom-btn:hover {
+    background-color: #F26699;
+    color: #F5F5F5;
+}
+
 .output-container {
     display: flex;
     flex-direction: column; /* 세로 방향으로 쌓기 */

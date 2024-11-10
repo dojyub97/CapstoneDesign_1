@@ -7,5 +7,5 @@ urlpatterns = [
     path('', main_view, name='main'),              
     path('login/', login_view, name='login'),      
     path('signup/', signup_view, name='signUp'),   
-    path('chatbot/', chatbot_view, name='chatbot') 
+    path('chat/', chatbot_view, name='chatbot'),
 ]

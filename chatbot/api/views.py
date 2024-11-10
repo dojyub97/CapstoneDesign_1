@@ -30,7 +30,6 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            type(user)
             token, created = Token.objects.get_or_create(user=user)
             request.session['authToken'] = token.key
             return Response({'authToken': token.key}, status=status.HTTP_200_OK)
@@ -55,9 +54,8 @@ class LogoutView(APIView):
 # Chatting Room CRUD
 class ChatRoomView(APIView):
     def get(self, request):
-        user=request.user
-        chat_room=ChatRoom.objects.filter(user=user)
-        serializer=ChatRoomSerializer(chat_room, many=True)
+        chat_rooms=ChatRoom.objects.filter(user_id=request.user.id)
+        serializer=ChatRoomSerializer(chat_rooms, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     def post(self, request):
         serializer = ChatRoomSerializer(data=request.data)
@@ -73,31 +71,31 @@ class ChatMessageView(APIView):
     def get(self, request):
         chatroom_id=request.query_params.get('chatroom_id')
         if chatroom_id:
-            query=ChatMessage.objects.filter(chat_room_id=chatroom_id)
-            serializer = ChatMessageSerializer(query, many=True)
+            messages=ChatMessage.objects.filter(chat_room_id=chatroom_id).order_by('created_at')
+            serializer = ChatMessageSerializer(messages, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error':'chatroom_id is required'}, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request):
-        chat_message = ChatMessageSerializer(data=request.data)
-        if chat_message.is_valid():
-            chat_message.save()
+        chat_message_serializer = ChatMessageSerializer(data=request.data)
+        if chat_message_serializer.is_valid():
+            chat_message=chat_message_serializer.save()
             
             # Call Google Gemini API for response
-            user_message = chat_message.validated_data.get("text")
+            user_message = chat_message_serializer.validated_data.get("text")
             prompt = generate_response(user_message)
             gemini_response = query_gemini_api(prompt)
             
             if gemini_response:
                 bot_message_text = gemini_response.get("response")  # 응답 필드에 맞게 수정
                 bot_message=ChatMessage.objects.create(
-                    chatroom=chat_message.validated_data.get('chatroom_id'),
+                    chatroom_id=chat_message.chatroom_id,
                     sender='system',
                     text=bot_message_text
                 )
                 return Response({
-                    'user_message':chat_message.data,
+                    'user_message':chat_message_serializer.data,
                     'bot_message':ChatMessageSerializer(bot_message).data
                     }, status=status.HTTP_201_CREATED)
             
             return Response({'error': 'Gemini API 응답 실패'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(chat_message.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(chat_message_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
