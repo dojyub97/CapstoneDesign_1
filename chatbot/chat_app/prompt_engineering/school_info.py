@@ -1,4 +1,8 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from dotenv import load_dotenv
+load_dotenv()
+#from pinecone_module import retrieve_similar_documents
 
 def print_intro_message():
     print("학교정보 질문 탭입니다. 어떤 것이 궁금한가요? 무엇이든 질문해주세요.")
@@ -41,16 +45,27 @@ few_shot_examples = [
     }
 ]
 
+# 환경 변수에서 API 키를 읽어옴
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 환경 변수를 잘 가져왔는지 확인
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
+
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
     max_tokens=200,
     timeout=30,
-    max_retries=2
+    max_retries=2,
+    google_api_key=GEMINI_API_KEY #인증오류관련
 )
 
 def generate_response(user_question, pinecone_data):
     print_intro_message()
+
+    pinecone_data = retrieve_similar_documents(user_question, "school_info")
 
     # 프롬프트 완성 - 기본 프롬프트 + 예시 + 사용자 질문
     full_prompt = base_prompt + few_shot_examples + [
@@ -64,9 +79,10 @@ def generate_response(user_question, pinecone_data):
         f"{response.content}"   
     )
     print(final_response) #터미널 출력
+    return final_response
 
 # 더미 데이터
-user_question = "학교 홈페이지에서 학사일정은 어디서 확인할 수 있나요?"
-pinecone_data = "학사일정은 학교 홈페이지의 '학사일정' 탭에서 확인하실 수 있습니다."
+#user_question = "학교 홈페이지에서 학사일정은 어디서 확인할 수 있나요?"
+#pinecone_data = "학사일정은 학교 홈페이지의 '학사일정' 탭에서 확인하실 수 있습니다."
 
-generate_response(user_question, pinecone_data)
+#generate_response(user_question, pinecone_data)
