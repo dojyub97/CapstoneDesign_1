@@ -30,7 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = [ 
     'localhost',
     '127.0.0.1',
-    'chatbotdemo.com',]
+    'chatbotdemo.com',
+    '13.125.195.52']
 
 AUTH_USER_MODEL = 'chat_app.User'
 
