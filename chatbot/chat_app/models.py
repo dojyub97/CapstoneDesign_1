@@ -22,7 +22,7 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.user_name
 class ChatRoom(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chatroom')
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chatroom')
     chatroom_title = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -47,7 +47,6 @@ class ChatMessage(models.Model):
         return self.sender
     
 
-# class File(models.Model):
-#     chatroom=models.ForeignKey(User,on_delete=models.CASCADE)
-#     file_name=models.CharField(max_length=255)
-#     content=models.BinaryField()
+class File(models.Model):
+    file_name=models.CharField(max_length=255)
+    content=models.BinaryField()

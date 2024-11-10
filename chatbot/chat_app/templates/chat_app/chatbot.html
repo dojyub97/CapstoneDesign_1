@@ -28,14 +28,13 @@
                 </button>
             </div>
             <div id="chat-rooms" class="chat-rooms">
-                <button id="initial" class="btn"> 
+                <button id="chatroom-1" class="btn chatroom-btn" onclick="selectChatRoom(1)"> 챗봇을 사용해보세요! </button>  
             </div>
         </div>
         <!-- 채팅 컨테이너 -->
         <div class="chat-container">
             <div id="output-container" class="output-container">
                 <div class="message bot-message">안녕하세요! 무엇을 도와드릴까요?</div>
-                <div class="message user-message">이것은 초기 메시지입니다.</div>
             </div>
             <div class="input-group">
                 <textarea id="input-message" placeholder="메시지를 입력하세요..." class="form-control"></textarea>

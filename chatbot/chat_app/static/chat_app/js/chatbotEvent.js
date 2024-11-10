@@ -1,17 +1,77 @@
-const socket = new WebSocket('ws://127.0.0.1:8000/ws/chat/');
+// 채팅방 초기 로딩 시 메시지 불러오기
+document.addEventListener("DOMContentLoaded", function() {
+    loadChatRooms();
+});
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    const message = data.message;
-    const outputContainer = document.getElementById('output-container');
-    const messageDiv = document.createElement('div');
+function loadChatRooms(){
+    fetch('/api/chatrooms/',{
+        method: 'GET',
+        headers: {
+            'Authorization': `Token {$localStorage.getItem('authToken')}`
+        }
+    })
+    .then(response => response.json())
+    .then(chatrooms => {
+        const chatRoomsContainer = document.getElementById('chat-rooms');
+        chatrooms.forEach(room => {
+            const button = document.createElement('button');
+            button.className = 'btn chatroom-btn';
+            button.textContent = room.name; // 채팅방 이름 표시
+            button.onclick = () => selectChatRoom(room.id);
+            chatRoomsContainer.appendChild(button);
+        });
 
-    // Bot 메시지 스타일 적용
-    messageDiv.className = 'message bot-message';
-    messageDiv.textContent = message;
-    outputContainer.appendChild(messageDiv);
-    outputContainer.scrollTop = outputContainer.scrollHeight; // 스크롤을 맨 아래로
+        if (chatrooms.length > 0) {
+            // 첫 번째 채팅방을 기본으로 로드
+            selectChatRoom(chatrooms[0].id);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading chatrooms:', error);
+    });
+}
+
+let currentChatRoomId=null;
+// 새로운 채팅방 선택 기능 추가
+function selectChatRoom(chatroomId) {
+    currentChatRoomId = chatroomId;
+    document.getElementById('output-container').innerHTML = '';
+    loadChatMessages(currentChatRoomId);
+}
+
+// 채팅방 사이드바
+document.getElementById('toggle-chat-rooms').onclick=function(){
+    const sidebar = document.querySelector('.sidebar');
+    const chatContainer = document.querySelector('.chat-container');
+    
+    sidebar.classList.toggle('hidden'); // 사이드바 숨기기
+    chatContainer.classList.toggle('shifted'); // 채팅 컨테이너 이동
 };
+
+// 채팅방의 기존 메시지 불러오기
+function loadChatMessages(currentChatRoomId) {
+    fetch(`/api/chat/${currentChatRoomId}/messages/`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Token ${localStorage.getItem('authToken')}`,
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(messages => {
+        const outputContainer = document.getElementById('output-container');
+        messages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = msg.sender === 'user' ? 'message user-message' : 'message bot-message';
+            messageDiv.textContent = msg.text;
+            outputContainer.appendChild(messageDiv);
+        });
+        outputContainer.scrollTop = outputContainer.scrollHeight;
+    })
+    .catch(error => {
+        console.error('Error loading messages:', error);
+    });
+}
 
 document.getElementById('send-button').onclick = function() {
     sendMessage();
@@ -36,26 +96,44 @@ function sendMessage() {
     messageDiv.textContent = inputMessage;
     outputContainer.appendChild(messageDiv);
     
-    // WebSocket으로 메시지 전송
-    socket.send(JSON.stringify({ message: inputMessage })); 
-    document.getElementById('input-message').value = ''; // 입력 필드 초기화
-    outputContainer.scrollTop = outputContainer.scrollHeight; // 스크롤을 맨 아래로
+    // REST API로 메시지 전송
+    fetch(`/api/chat/${currentChatRoomId}/messages/`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Token ${localStorage.getItem('authToken')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: inputMessage})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.bot_message&&data.bot_message.text){
+            displayBotMessage(data.bot_message.text);
+        }else{
+            console.error("Bot message not found in response:", data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+    document.getElementById('input-message').value = '';
+    outputContainer.scrollTop = outputContainer.scrollHeight;
 }
 
-/* 채팅방 분리에 따른 함수 */
-// function loadChat(room){
-// }
+function displayBotMessage(message) {
+    const outputContainer = document.getElementById('output-container');
+    const messageDiv = document.createElement('div');
 
-document.getElementById('toggle-chat-rooms').onclick=function(){
-    const sidebar = document.querySelector('.sidebar');
-    const chatContainer = document.querySelector('.chat-container');
-    
-    sidebar.classList.toggle('hidden'); // 사이드바 숨기기
-    chatContainer.classList.toggle('shifted'); // 채팅 컨테이너 이동
-};
+    messageDiv.className = 'message bot-message';
+    messageDiv.textContent = message;
+    outputContainer.appendChild(messageDiv);
+    outputContainer.scrollTop = outputContainer.scrollHeight;
+}
 
+
+// 로그아웃 버튼 이벤트 리스너
 document.addEventListener("DOMContentLoaded", function() {
-    // 로그아웃 버튼 이벤트 리스너
     const logoutButton = document.getElementById("logout-button");
 
     logoutButton.addEventListener("click", function() {
