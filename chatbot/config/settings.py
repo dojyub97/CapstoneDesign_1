@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, environ
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +24,14 @@ TEMPLATES_DIR=os.path.join(BASE_DIR, 'templates')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-!tlhgzc3lh0cptzagc*+*y0*p5!*vk(ua%+ovvnk15*2jincoy'
+
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env()
+
+# Load GEMINI_API_KEY from .env
+GEMINI_API_KEY = env("GEMINI_API_KEY")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -64,11 +73,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django_plotly_dash.middleware.BaseMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS=[
     'http://localhost:8000',
-    'https://chatbotdemo.',
+    'https://chatbotdemo',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -126,7 +136,16 @@ REST_FRAMEWORK={
         'DEFAULT_AUTHENTICATION_CLASSES': [
             'rest_framework.authentication.TokenAuthentication',
             'rest_framework.permissions.AllowAny',
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
         ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Adjust as needed
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 # Internationalization

@@ -26,9 +26,12 @@ document.getElementById('login-form').addEventListener('submit', function(event)
         })
         .then(data => {
             // JSON 응답 처리
-            if (data.authToken) {
-                localStorage.setItem('authToken', data.authToken);
-                window.location.href = '/chatbot/';
+            if (data.access_token) {
+                localStorage.setItem('access_token', data.access_token);
+
+                // 여러 개의 채팅방일 경우 list로 변경해야 함
+                const chatroomId = data.chatroom_id;
+                window.location.href = `/chatbot/${chatroomId}`;
             }else{
                 errorMessage.style.display = 'block';
                 errorMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';

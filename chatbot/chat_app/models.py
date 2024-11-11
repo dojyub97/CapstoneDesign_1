@@ -9,6 +9,16 @@ class UserManager(BaseUserManager):
         user = self.model(user_name=user_name)
         user.set_password(password)
         user.save(using=self._db)
+        
+        # 저장된 user 객체의 ID 확인
+        if not user.id:
+            raise ValueError("User ID was not assigned properly.")
+        
+        return user
+    def create_superuser(self, user_name, password=None):
+        user = self.create_user(user_name=user_name, password=password)
+        user.is_admin = True
+        user.save(using=self._db)
         return user
 
 class User(AbstractBaseUser):

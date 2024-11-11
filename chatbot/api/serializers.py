@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from chat_app.models import User, ChatRoom, ChatMessage
-from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 
@@ -31,12 +31,12 @@ class SignUpSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('password2') # password2 필드는 User 모델에 저장하지 않음
-        user = User.objects.create_user(
+        user = User.objects.create(
             user_name=validated_data['user_name'],
             password=validated_data['password'],
         )
-        return {'user':user}
-
+        user.save()
+        return user
 # 사용자 로그인
 class LoginSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(required=True)
@@ -50,18 +50,27 @@ class LoginSerializer(serializers.ModelSerializer):
         user_name = data.get("user_name")
         password = data.get("password")
 
-        try:
+        if User.objects.filter(user_name=user_name).first():
             user = User.objects.get(user_name=user_name)
-        except User.DoesNotExist:
-            raise serializers.ValidationError({"non_field_errors": ["Invalid credentials"]})
-
-        if not user.check_password(password):
-            raise serializers.ValidationError({"non_field_errors": ["Invalid credentials"]})
-
-        return {"user": user}  # user 객체 반환
+            if not user.check_password(password):
+                raise serializers.ValidationError('잘못된 비밀번호입니다.')
+            else:
+                token=RefreshToken.for_user(user)
+                refresh=str(token)
+                access=str(token.access_token)
+                data={
+                    'user': user,
+                    'refresh_token': refresh,
+                    'access_token' : access,
+                }
+                return data
+        else:
+            raise serializers.ValidationError('존재하지 않는 사용자입니다.')
         
+    
 # 채팅방
 class ChatRoomSerializer(serializers.ModelSerializer):
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model=ChatRoom
         fields=('id', 'user_id', 'chatroom_title','created_at','topic')
