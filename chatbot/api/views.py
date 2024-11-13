@@ -124,7 +124,6 @@ class ChatMessageView(APIView):
                     'bot_message':ChatMessageSerializer(bot_message).data
                 }, status=status.HTTP_201_CREATED)
                 
-                return Response({'error': 'Gemini API 응답 실패'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 # gemini_response = query_gemini_api(prompt)
                 # if gemini_response:
                 #     bot_message=ChatMessage.objects.create(

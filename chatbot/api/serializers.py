@@ -31,10 +31,10 @@ class SignUpSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('password2') # password2 필드는 User 모델에 저장하지 않음
-        user = User.objects.create(
+        user = User(
             user_name=validated_data['user_name'],
-            password=validated_data['password'],
         )
+        user.set_password(validated_data['password'])
         user.save()
         return user
 # 사용자 로그인

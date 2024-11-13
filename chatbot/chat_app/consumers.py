@@ -1,8 +1,4 @@
-
-
-
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
 from .prompt_engineering import general_text
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
