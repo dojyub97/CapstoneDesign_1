@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager,  PermissionsMixin
 
 class UserManager(BaseUserManager):
     def create_user(self, user_name, password=None):
@@ -9,12 +9,27 @@ class UserManager(BaseUserManager):
         user = self.model(user_name=user_name)
         user.set_password(password)
         user.save(using=self._db)
+        
+        # 저장된 user 객체의 ID 확인
+        if not user.id:
+            raise ValueError("User ID was not assigned properly.")
+        
+        return user
+    def create_superuser(self, user_name, password=None):
+        user = self.create_user(user_name=user_name, password=password)
+        user.is_admin = True
+        user.is_staff = True  
+        user.is_superuser = True
+        user.save(using=self._db)
         return user
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser,  PermissionsMixin):
     user_name = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=128)
-
+    is_active = models.BooleanField(default=True)  # 활성화 필드
+    is_staff = models.BooleanField(default=False)  # 관리자 권한 필드
+    is_admin = models.BooleanField(default=False)
+    
     objects = UserManager()
 
     USERNAME_FIELD = 'user_name'
