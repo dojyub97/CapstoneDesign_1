@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --hover-color: #4338ca;
+            --background-color: #f9fafb;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 10px;  /* 상단 패딩 감소 */
+            background-color: var(--background-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;  /* 컨테이너 패딩 감소 */
+        }
+
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            font-size: 2rem;  /* 제목 크기 약간 감소 */
+            margin: 0.5rem 0;  /* 제목 마진 감소 */
+            font-weight: 600;
+        }
+
+        .file-input-container {
+            text-align: center;
+            margin: 1rem 0;  /* 마진 감소 */
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 8px 20px;  /* 패딩 약간 감소 */
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            background-color: var(--hover-color);
+        }
+
+        #pdfContainer {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 10px 0;  /* 마진 감소 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: 75vh;  /* 높이 살짝 증가 */
+            overflow-y: auto;
+        }
+
+        .page-container {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-container canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        #selectedPages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;  /* 갭 약간 감소 */
+            justify-content: center;
+            margin: 1rem 0;  /* 마진 감소 */
+        }
+
+        button {
+            padding: 8px 20px;  /* 패딩 감소 */
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #result {
+            text-align: center;
+            margin-top: 0.5rem;  /* 마진 감소 */
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        /* Scrollbar Styling */
+        #pdfContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #pdfContainer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #pdfContainer::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 4px;
+        }
+
+        #pdfContainer::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Loading indicator */
+        .loading {
+            text-align: center;
+            padding: 1rem;  /* 패딩 감소 */
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;  /* 모바일에서 패딩 더 감소 */
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;  /* 모바일에서 제목 크기 더 감소 */
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Viewer</h1>
+        <div class="file-input-container">
+            <label for="fileInput" class="file-input-label">
+                PDF 파일 선택하기
+            </label>
+            <input type="file" id="fileInput" accept=".pdf">
+        </div>
+        <div id="pdfContainer"></div>
+        <div id="selectedPages">
+            <button id="showSelectedPages">선택한 페이지만 보이기</button>
+            <button id="showAllPages">모든 페이지 보이기</button>
+            <button id="downloadSelected">선택한 페이지 다운로드</button>
+            <button id="extractText">선택한 페이지에서 텍스트 추출하기</button>
+            <button onclick="sendData()">전송</button>
+        </div>
+        <p id="result"></p>
+    </div>
+
+
+ 
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const pdfContainer = document.getElementById("pdfContainer");
+    const showSelectedPagesButton = document.getElementById("showSelectedPages");
+    const showAllPagesButton = document.getElementById("showAllPages");
+    const downloadSelectedButton = document.getElementById("downloadSelected");
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    let loadedPdf = null; // 로드된 PDF를 저장
+    let allPagesRendered = []; // 렌더링된 모든 페이지 정보
+
+    // PDF.js 워커 설정
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file && file.type === "application/pdf") {
+        const fileReader = new FileReader();
+
+        fileReader.onload = async function () {
+          const typedArray = new Uint8Array(this.result);
+          loadedPdf = await pdfjsLib.getDocument(typedArray).promise; // PDF 로드
+
+          renderAllPages();
+        };
+
+        fileReader.readAsArrayBuffer(file);
+      } else {
+        alert("Please upload a valid PDF file.");
+      }
+    });
+
+    // 모든 페이지 렌더링
+    async function renderAllPages() {
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered = []; // 렌더링된 페이지 목록 초기화
+
+      for (let pageNum = 1; pageNum <= loadedPdf.numPages; pageNum++) {
+        const page = await loadedPdf.getPage(pageNum);
+
+        // PDF 페이지 뷰포트 설정
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+
+        // 페이지 컨테이너 생성
+        const pageContainer = document.createElement("div");
+        pageContainer.className = "page-container";
+        pageContainer.dataset.pageNum = pageNum; // 페이지 번호 저장
+
+        // 캔버스 생성
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        // 캔버스 크기 설정
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // PDF 렌더링
+        const renderContext = {
+          canvasContext: context,
+          viewport,
+        };
+
+        await page.render(renderContext).promise;
+
+        // 체크박스 추가
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `page-${pageNum}`;
+        checkbox.dataset.pageNum = pageNum;
+
+        const label = document.createElement("label");
+        label.htmlFor = `page-${pageNum}`;
+        label.textContent = ` Page ${pageNum}`;
+
+        // 페이지 컨테이너에 추가
+        pageContainer.appendChild(canvas);
+        pageContainer.appendChild(checkbox);
+        pageContainer.appendChild(label);
+        pdfContainer.appendChild(pageContainer);
+
+        // 렌더링된 페이지 목록에 추가
+        allPagesRendered.push(pageContainer);
+      }
+    }
+
+    // 선택된 페이지만 표시
+    showSelectedPagesButton.addEventListener("click", () => {
+      const checkboxes = document.querySelectorAll("#pdfContainer input[type='checkbox']");
+      const selectedPageNums = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => parseInt(checkbox.dataset.pageNum, 10));
+
+      if (selectedPageNums.length === 0) {
+        alert("No pages selected.");
+        return;
+      }
+
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered.forEach(page => {
+        if (selectedPageNums.includes(parseInt(page.dataset.pageNum, 10))) {
+          pdfContainer.appendChild(page);
+        }
+      });
+    });
+
+    // 모든 페이지 다시 표시
+    showAllPagesButton.addEventListener("click", () => {
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered.forEach(page => {
+        pdfContainer.appendChild(page);
+      });
+    });
+
+    // 선택한 페이지 다운로드
+    downloadSelectedButton.addEventListener("click", async () => {
+      if (!loadedPdf) {
+        alert("Please upload a PDF file first.");
+        return;
+      }
+
+      const checkboxes = document.querySelectorAll("#pdfContainer input[type='checkbox']");
+      const selectedPageNums = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => parseInt(checkbox.dataset.pageNum, 10));
+
+      if (selectedPageNums.length === 0) {
+        alert("No pages selected.");
+        return;
+      }
+
+      const pdfDoc = await PDFLib.PDFDocument.create();
+      const originalPdfBytes = await loadedPdf.getData(); // 원본 PDF 데이터 가져오기
+      const originalPdfDoc = await PDFLib.PDFDocument.load(originalPdfBytes);
+
+      for (const pageNum of selectedPageNums) {
+        const [copiedPage] = await pdfDoc.copyPages(originalPdfDoc, [pageNum - 1]);
+        pdfDoc.addPage(copiedPage);
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "selected_pages.pdf";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    });
+
+    const extractTextButton = document.getElementById("extractText");
+
+    extractTextButton.addEventListener("click", async () => {
+      if (!loadedPdf) {
+        alert("Please upload a PDF file first.");
+        return;
+      }
+
+      const checkboxes = document.querySelectorAll("#pdfContainer input[type='checkbox']");
+      const selectedPageNums = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => parseInt(checkbox.dataset.pageNum, 10));
+
+      if (selectedPageNums.length === 0) {
+        alert("No pages selected.");
+        return;
+      }
+
+      const extractedTexts = [];
+
+      for (const pageNum of selectedPageNums) {
+        const page = await loadedPdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' '); // 텍스트 합치기
+        extractedTexts.push(`Page ${pageNum}: ${pageText}`);
+      }
+
+      // 결과를 페이지에 표시
+      const resultContainer = document.getElementById("result");
+      resultContainer.textContent = extractedTexts.join("\n\n");
+    });
+
+
+    // id=result인 요소의 내용 백엔드로 전송하기
+    function sendData() {
+      // id="result" 요소의 내용 가져오기
+      const resultContent = document.querySelector('#result').textContent;
+
+      // AJAX 요청
+      fetch('/chatbot/fetch-result-content/', {  // URL 수정
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 추가
+          },
+          body: JSON.stringify({ content: resultContent })
+      })
+      .then(response => response.json())
+      .then(data => {
+          alert(data.message); // 서버 응답 출력
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+
+    
+  </script>
+</body>
+</html>
+
+
+
+
