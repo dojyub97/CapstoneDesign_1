@@ -2,7 +2,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from dotenv import load_dotenv
 load_dotenv()
-#from pinecone_module import retrieve_similar_documents
+from chat_app.consumers import retrieve_similar_document
 
 def print_intro_message():
     print("학교정보 질문 탭입니다. 어떤 것이 궁금한가요? 무엇이든 질문해주세요.")
@@ -62,27 +62,26 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=GEMINI_API_KEY #인증오류관련
 )
 
-def generate_response(user_question, pinecone_data):
+def generate_response(user_question):
     print_intro_message()
 
-    pinecone_data = retrieve_similar_documents(user_question, "school_info")
+    page_content, metadata = retrieve_similar_document(user_question, "school_info")
+
+    if not page_content:
+        final_response = "관련된 공지사항을 찾을 수 없습니다. 다시 시도해 주세요."
+        return final_response
 
     # 프롬프트 완성 - 기본 프롬프트 + 예시 + 사용자 질문
     full_prompt = base_prompt + few_shot_examples + [
         {"role": "user", "content": user_question},
+        {"role": "assistant", "content": page_content}
     ]
     response = llm.invoke(full_prompt)
 
-    # 최종 응답 생성 - Pinecone 데이터와 Gemini API 응답 결합
     final_response = (
-        f"{pinecone_data}\n"
+        f"{page_content}\n"
+        f"{metadata['source'] if metadata and 'source' in metadata else '출처 없음'}\n"
         f"{response.content}"   
     )
     print(final_response) #터미널 출력
     return final_response
-
-# 더미 데이터
-#user_question = "학교 홈페이지에서 학사일정은 어디서 확인할 수 있나요?"
-#pinecone_data = "학사일정은 학교 홈페이지의 '학사일정' 탭에서 확인하실 수 있습니다."
-
-#generate_response(user_question, pinecone_data)
