@@ -1,4 +1,8 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+"""from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from dotenv import load_dotenv
+load_dotenv()
+from chat_app.consumers import retrieve_similar_document
 
 def print_intro_message():
     print("예상문제 관련 질문 탭입니다. 예상문제를 생성해 드릴게요. 질문해 주세요.")
@@ -44,37 +48,58 @@ few_shot_examples = [
             "답변: 수박은 열대과일로, 겉이 초록색이고 속은 빨간색이다. 또한, 씨가 있으며 넝쿨에서 자란다. "
             "수박은 따뜻한 기후에서 잘 자라며, 물이 많은 환경을 선호한다."
         )
+    },
+    {
+        "role": "user",
+        "content": "객관식 문제를 만들어 주세요."
+    },
+    {
+        "role": "assistant",
+        "content": (
+            "문제) 다음 중 틀린 것만 고르시오.\n"
+            "a. 수박은 지중해 과일이다.\n"
+            "b. 수박은 겉이 초록색이고 속이 빨간색이다.\n"
+            "c. 수박은 나무에서 자란다.\n"
+            "d. 수박은 물이 많은 환경을 선호한다.\n"
+            "e. 위 내용 중 틀린 것은 2개이다.\n"
+        )
     }
 ]
+
+# 환경 변수에서 API 키를 읽어옴
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 환경 변수를 잘 가져왔는지 확인
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. 환경 변수를 확인해주세요.")
+
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
     max_tokens=300,
     timeout=30,
-    max_retries=2
+    max_retries=2,
+    google_api_key=GEMINI_API_KEY #인증오류관련
 )
 
-def generate_response(user_question, pinecone_data):
+def generate_response(user_question):
     print_intro_message()
+
+    pdf_info_content, _ = retrieve_similar_document(user_question, "QnA")
 
     # 프롬프트 완성 - 기본 프롬프트 + 예시 + 사용자 질문
     full_prompt = base_prompt + few_shot_examples + [
         {"role": "user", "content": user_question},
+        {"role": "assistant", "content": pdf_info_content}
     ]
 
     response = llm.invoke(full_prompt)
     response_content = response.content
 
     final_response = (
-        f"{pinecone_data}\n"
+        f"{pdf_info_content}\n"
         f"{response_content}"   
     )
     print(final_response)  # 터미널 출력
-
-# 더미 데이터
-user_question = "사과에 대한 문제를 만들어 주세요."
-pinecone_data = "과일에 관한 일반 정보가 검색되었습니다."
-
-# 문제 생성
-generate_response(user_question, pinecone_data)
+    return final_response"""
