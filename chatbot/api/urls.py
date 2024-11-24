@@ -10,8 +10,8 @@ urlpatterns = [
     path("chatroom/", ChatRoomView.as_view(), name="chatroom"),
     path("chatroom/<str:topic>/", ChatRoomView.as_view(), name="chat-room"),
     path(
-        "chatroom/<int:chatroom_id>/message/",
-        ChatMessageView.as_view(),
+        "chatroom/school-info/<int:chatroom_id>/",
+        SchoolInfoChatView.as_view(),
         name="chat-message",
     ),
 ]

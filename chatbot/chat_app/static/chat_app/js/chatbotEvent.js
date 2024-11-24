@@ -38,15 +38,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!button) return; // 클릭한 대상이 버튼이 아니면 무시
 
         const category = button.innerText.trim(); // 버튼 텍스트로 토픽 추출
+        let topic;
         if (category === "홈") {
             loadHomePage();
             window.history.pushState({}, '', '/home/');
-        }else{
+        } else {
             if (category === "학교정보")
-                topic = "school_info"
+                topic = "school_info";
             else
-                topic = "textbook"
-            
+                topic = "textbook";
+
             const messageContainer = document.getElementById("message-container");
             messageContainer.innerHTML = `<h3>${category}</h3>`;
             window.history.pushState({}, '', `/${encodeURIComponent(category)}/`);
@@ -98,19 +99,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function sendMessage() {
         console.log(token);
-        const chatInput = document.getElementById("chat-input").value;
-        if (chatInput.trim() === '') return; // 빈 메시지 전송 방지
+        const chatInputElement = document.getElementById("chat-input");
+        const chatInputValue = chatInputElement.value.trim();
+        if (chatInputValue === '') return; // 빈 메시지 전송 방지
 
-        displayMessage("user", chatInput);
-        chatInput.value = "";
+        displayMessage("user", chatInputValue);
+        chatInputElement.value = "";
 
-        fetch(`/api/chatroom/${currentChatroomId}/message/`, {
+        fetch(`/api/chatroom/school-info/${currentChatroomId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
-            body: JSON.stringify({ chatroom_id: currentChatroomId, sender: 'user', text: chatInput }),
+            body: JSON.stringify({ chatroom_id: currentChatroomId, sender: 'user', text: chatInputValue }),
         })
             .then(response => response.json())
             .then(data => {
@@ -119,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 displayMessage("Bot", botMessage);
             })
             .catch(error => console.error("Error:", error));
-        document.getElementById('chat-input').value = '';
     }
 
     function displayMessage(sender, message) {
@@ -135,43 +136,14 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             messageElement.className = "flex items-start";
             messageElement.innerHTML = `
-                    <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">A</div>
+                    <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
                     <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl">${message}</div>
                 `;
         }
 
         messageContainer.appendChild(messageElement);
-        messageContainer.scrollTop = messageContainer.scrollHeight; 
+        messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 });
 
 // localstorage에 추가 key값을 넣어서 previous 대화내역을 저장
-//
-
-// 로그아웃 버튼 이벤트 리스너
-// document.addEventListener("DOMContentLoaded", function () {
-//     const logoutButton = document.getElementById("logout-button");
-
-//     logoutButton.addEventListener("click", function () {
-//         // 세션에서 토큰을 삭제하는 API 호출
-//         fetch('/api/logout/', {
-//             method: 'POST',
-//             headers: {
-//                 'Authorization': `Token ${token}`,
-//                 'Content-Type': 'application/json'
-//             },
-//         })
-//             .then(response => {
-//                 if (response.ok) {
-//                     // 토큰 삭제 및 메인 페이지로 리다이렉트
-//                     localStorage.removeItem('authToken');  // 로컬 스토리지에서 토큰 삭제
-//                     window.location.href = '/';  // 메인 페이지로 이동
-//                 } else {
-//                     console.error("Logout failed:", response.statusText);
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error("Error:", error);
-//             });
-//     });
-// });

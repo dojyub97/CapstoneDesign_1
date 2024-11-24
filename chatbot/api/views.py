@@ -3,9 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.authentication import (
-    JWTAuthentication,
-)  # Import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import authentication_classes, permission_classes
 
 from .serializers import *
@@ -93,7 +91,7 @@ class ChatRoomView(APIView):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 # Chatting message CRUD
-class ChatMessageView(APIView):
+class SchoolInfoChatView(APIView):
     def post(self, request, chatroom_id):
         try:
             chatroom = ChatRoom.objects.get(id=chatroom_id)
@@ -102,15 +100,11 @@ class ChatMessageView(APIView):
             if serializer.is_valid():
                 chat_message = serializer.save(chatroom_id=chatroom)
                 input_message = serializer.validated_data.get("text")
+
                 # test
                 print(input_message)
-
-                # Call prompt->data retrieval & generation
-                if chatroom.topic == "school_info":
-                    output_message = school_info.generate_response(input_message)
-                elif chatroom.topic == "textbook":
-                    output_message = pdf_info.generate_response(input_message)
-
+                # Call prompt-> response bot message
+                output_message = school_info.generate_response(input_message)
                 # test
                 print(output_message)
 
