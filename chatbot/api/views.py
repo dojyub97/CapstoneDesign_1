@@ -101,14 +101,18 @@ class ChatMessageView(APIView):
 
             if serializer.is_valid():
                 chat_message = serializer.save(chatroom_id=chatroom)
-
                 input_message = serializer.validated_data.get("text")
+                # test
+                print(input_message)
 
                 # Call prompt->data retrieval & generation
                 if chatroom.topic == "school_info":
                     output_message = school_info.generate_response(input_message)
                 elif chatroom.topic == "textbook":
                     output_message = pdf_info.generate_response(input_message)
+
+                # test
+                print(output_message)
 
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat_message.chatroom_id,
