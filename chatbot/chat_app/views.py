@@ -1,12 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 
 def chatbot_view(request):
     return render(request, "chat_app/chatbot.html")
-
-
-def main_view(request):
-    return render(request, "chat_app/main.html")
 
 
 def login_view(request):

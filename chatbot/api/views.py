@@ -10,7 +10,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 
 from .serializers import *
 from urllib.parse import unquote
-from chat_app.prompt_engineering import school_info, create_q
+from chat_app.prompt_engineering import school_info, pdf_info
 
 
 @permission_classes([AllowAny])
@@ -71,7 +71,7 @@ class ChatRoomView(APIView):
         decoded_topic = unquote(topic)
 
         # 사용자별로 초기 ChatRoom 생성
-        initial_topics = ["school_life", "pdf_questions"]
+        initial_topics = ["school_info", "textbook"]
         for initial_topic in initial_topics:
             ChatRoom.objects.get_or_create(user_id=request.user, topic=initial_topic)
 
@@ -105,14 +105,10 @@ class ChatMessageView(APIView):
                 input_message = serializer.validated_data.get("text")
 
                 # Call prompt->data retrieval & generation
-                if chatroom.topic == "school_life":
-                    output_message = school_info.generate_response(
-                        input_message, chatroom.topic
-                    )
-                elif chatroom.topic == "pdf_questions":
-                    output_message = create_q.generate_response(
-                        input_message, chatroom.topic
-                    )
+                if chatroom.topic == "school_info":
+                    output_message = school_info.generate_response(input_message)
+                elif chatroom.topic == "textbook":
+                    output_message = pdf_info.generate_response(input_message)
 
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat_message.chatroom_id,
