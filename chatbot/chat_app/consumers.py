@@ -22,17 +22,19 @@ pc = Pinecone(api_key=PINECONE_API_KEY)
 openai.api_key = OPENAI_API_KEY
 
 
-# index 삭제하는 함수  
-# index("langchain-test-index") 이렇게 호출
+
 def delete_index(index_name):
+    # index 삭제하는 함수  
+    # index("langchain-test-index") 이렇게 호출
     if index_name in [index_info["name"] for index_info in pc.list_indexes()]:
         pc.delete_index(index_name)
         return f"Index '{index_name}' has been deleted."
     return f"Index '{index_name}' does not exist."
 
-# 인덱스 생성 함수
-# index = create_index() 이렇게 호출
+
 def create_index(index_name="langchain-test-index", dimension=1536):
+    # 인덱스 생성 함수
+    # index = create_index() 이렇게 호출
     existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
     if index_name not in existing_indexes:
         pc.create_index(
@@ -46,7 +48,7 @@ def create_index(index_name="langchain-test-index", dimension=1536):
     return pc.Index(index_name)
 
 def retrieve_similar_document(query, data_type):
-    # vdb에서 쿼리와 유사한 데이터 가져오는 함수
+    # vdb에서 쿼리와 유사한 데이터(document객체)의 리스트를 가져오는 함수
     
     # args
         # query : 사용자가 입력한 문자열
@@ -58,8 +60,8 @@ def retrieve_similar_document(query, data_type):
     
     # 반환형
         # document객체가 저장된 리스트를 반환한다.
-        # document.metadata는 딕셔너리
-        # document.page_content는 str
+        # 반환값[i].metadata는 데이터본문의 메타데이터(dictionary)
+        # 반환값[i].page_content는 vdb에 저장되어있던 데이터본문(str)
     
     embeddings_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 
@@ -69,8 +71,6 @@ def retrieve_similar_document(query, data_type):
     if data_type == "school_info":
         result = vector_store.similarity_search(query, k=1, filter={"type": data_type}) 
         return result
-        # result[0].page_content는 db에 저장돼있던 데이터본문에 해당. 
-        # result[0].metadata는 데이터본문의 메타데이터로 딕셔너리 구조. 
     elif data_type == "textbook":
         result = vector_store.similarity_search(query, k=10, filter={"type": data_type})
         return result
