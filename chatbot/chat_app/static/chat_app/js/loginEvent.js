@@ -1,4 +1,4 @@
-document.getElementById('login-form').addEventListener('submit', function(event) {
+document.getElementById('login-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
     const user_name = document.getElementById('username').value;
@@ -9,12 +9,12 @@ document.getElementById('login-form').addEventListener('submit', function(event)
     errorMessage.style.display = 'none';
 
     fetch('/api/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_name, password }),
-        })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_name, password }),
+    })
         .then(response => {
             if (!response.ok) {
                 // 응답이 2xx가 아니면 에러를 처리
@@ -30,9 +30,8 @@ document.getElementById('login-form').addEventListener('submit', function(event)
                 localStorage.setItem('access_token', data.access_token);
 
                 // 여러 개의 채팅방일 경우 list로 변경해야 함
-                const chatroomId = data.chatroom_id;
-                window.location.href = `/chatbot/${chatroomId}`;
-            }else{
+                window.location.href = `chatbot/home/`;
+            } else {
                 errorMessage.style.display = 'block';
                 errorMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
             }
