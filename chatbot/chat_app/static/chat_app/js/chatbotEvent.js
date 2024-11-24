@@ -41,9 +41,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (category === "홈") {
             loadHomePage();
             window.history.pushState({}, '', '/home/');
-        } else {
-            loadChatroomByTopic(category);
+        }else{
+            if (category === "학교정보")
+                topic = "school_life"
+            else
+                topic = "pdf_questions"
+            
+            const messageContainer = document.getElementById("message-container");
+            messageContainer.innerHTML = `<h3>${category}</h3>`;
             window.history.pushState({}, '', `/${encodeURIComponent(category)}/`);
+            loadChatroomByTopic(topic);
         }
     });
 
@@ -70,9 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentChatroomId = data.chatroom_id;
 
                 // UI 업데이트 - 메시지 컨테이너 초기화 및 새 메시지 로드
-                const messageContainer = document.getElementById("message-container");
-                messageContainer.innerHTML = `<h3>${data.chatroom.topic}</h3>`;
-
                 data.messages.forEach(message => {
                     displayMessage("User", message.user_message);
                     displayMessage("Bot", message.bot_message);

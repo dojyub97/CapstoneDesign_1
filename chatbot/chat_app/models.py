@@ -52,8 +52,8 @@ class ChatRoom(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     topic_choices = [
-        ("학교정보", "학교정보"),
-        ("예상문제", "예상문제"),
+        ("학교정보", "school_life"),
+        ("예상문제", "pdf_questions"),
     ]
     topic = models.CharField(max_length=50, choices=topic_choices, null=False)
 
