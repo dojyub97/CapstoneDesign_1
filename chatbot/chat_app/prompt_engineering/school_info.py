@@ -65,11 +65,14 @@ llm = ChatGoogleGenerativeAI(
 def generate_response(user_question):
     print_intro_message()
 
-    page_content, metadata = retrieve_similar_document(user_question, "school_info")
+    results = retrieve_similar_document(user_question, "school_info")
 
-    if not page_content:
+    if not results:
         final_response = "관련된 공지사항을 찾을 수 없습니다. 다시 시도해 주세요."
         return final_response
+    
+    page_content = results[0].page_content
+    metadata = results[0].metadata
 
     # 프롬프트 완성 - 기본 프롬프트 + 예시 + 사용자 질문
     full_prompt = base_prompt + few_shot_examples + [
