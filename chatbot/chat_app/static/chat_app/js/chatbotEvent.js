@@ -43,9 +43,9 @@ document.addEventListener("DOMContentLoaded", function () {
             window.history.pushState({}, '', '/home/');
         }else{
             if (category === "학교정보")
-                topic = "school_life"
+                topic = "school_info"
             else
-                topic = "pdf_questions"
+                topic = "textbook"
             
             const messageContainer = document.getElementById("message-container");
             messageContainer.innerHTML = `<h3>${category}</h3>`;
