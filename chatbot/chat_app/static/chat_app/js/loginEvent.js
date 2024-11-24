@@ -30,7 +30,7 @@ document.getElementById('login-form').addEventListener('submit', function (event
                 localStorage.setItem('access_token', data.access_token);
 
                 // 여러 개의 채팅방일 경우 list로 변경해야 함
-                window.location.href = `chatbot/home/`;
+                window.location.href = `/chatbot/home/`;
             } else {
                 errorMessage.style.display = 'block';
                 errorMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
