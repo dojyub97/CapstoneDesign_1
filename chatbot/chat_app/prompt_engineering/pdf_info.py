@@ -21,11 +21,8 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=GEMINI_API_KEY #인증오류관련
 )
 
-def print_intro_message(question_type):
-    if question_type == "pdf_questions":
-        print("PDF 관련 질문 탭입니다. 무엇을 도와드릴까요? 질문해 주세요.")
-    elif question_type == "QnA":
-        print("예상문제 관련 질문 탭입니다. 예상문제를 생성해 드릴게요. 질문해 주세요.")
+def print_intro_message():
+    print("질문을 입력해 주세요. 예상문제 생성 또는 PDF 관련 질문 모두 가능합니다.")
 
 def clean_text(document_content):
     document_content = re.sub(r'\s+', ' ', document_content)
@@ -37,108 +34,72 @@ def format_output(content):
     formatted = '\n'.join(f"- {line.strip()}" for line in lines if line)
     return formatted
 
-base_prompt = {
-    "pdf_questions": [
-        {
-            "role": "assistant",
-            "content": (
-                "당신은 학생들의 PDF 관련 질문에 친절하고 명확하게 답변하는 선생님입니다. "
-                "학생들이 질문하기 편하게 예의를 갖춘 상담원 같은 느낌으로 대해줬으면 좋겠습니다. "
-                "학생들이 반말로 질문하면 편하게 반말로 대해주고, ~인가요? 와 같이 존댓말로 질문할 경우 정중하게 존댓말로 대해주세요. "
-                "문장에서는 상관없지만 사과와 같은 단어 한개의 출력에 있어 한가지 언어만 사용했으면 좋겠습니다."
-                "PDF 파일과 관련된 질문에 대해 요약 요청이나 파일 상태에 대한 안내를 제공해 주세요."
-            )
-        }
-    ],
-    "QnA": [
-        {
-            "role": "assistant",
-            "content": (
-                "당신은 학생들의 예상문제를 친절하고 명확하게 만들어주는 선생님입니다. "
-                "학생들이 질문하기 편하게 예의를 갖춘 상담원 같은 느낌으로 대해줬으면 좋겠습니다. "
-                "학생들이 반말로 질문하면 편하게 반말로 대해주고, ~인가요? 와 같이 존댓말로 질문할 경우 정중하게 존댓말로 대해주세요. "
-                "문장에서는 상관없지만 사과와 같은 단어 한개의 출력에 있어 한가지 언어만 사용했으면 좋겠습니다."
-                "학생들에게 필요한 예상문제를 제공해 주세요. 객관식 문제는 보기와 정답을 포함하고, "
-                "주관식 문제는 논술형 답변도 가능합니다."
-            )
-        }
-    ]
-}
+base_prompt = [
+    {
+        "role": "assistant",
+        "content": (
+            "당신은 학생들의 질문에 친절하고 명확하게 답변하는 선생님입니다. "
+            "학생들이 질문하기 편하게 예의를 갖춘 상담원 같은 느낌으로 대해줬으면 좋겠습니다. "
+            "질문 유형에 따라 예상문제를 생성하거나 PDF 파일의 정보를 제공합니다. "
+            "문장에서는 상관없지만 사과와 같은 단어 한개의 출력에 있어 한가지 언어만 사용했으면 좋겠습니다. "
+            "학생들이 반말로 질문하면 편하게 반말로 대해주고, 존댓말로 질문할 경우 정중하게 존댓말로 답해주세요. "
+            "PDF 파일과 관련된 요청에서는 파일 상태나 요약을 제공하고, 예상문제 요청에서는 객관식 및 주관식 혹은 논술형 문제를 생성하세요."
+        )
+    }
+]
 
-few_shot_examples = {
-    "pdf_questions": [
-        {"role": "user", "content": "파일을 요약해 줄 수 있나요?"},
-        {"role": "assistant", "content": "먼저 PDF 파일을 업로드해 주세요. 업로드된 파일이 없으면 요약을 진행할 수 없습니다."},
-        {"role": "user", "content": "파일 요약을 해주세요."},
-        {"role": "assistant", "content": "PDF 파일이 업로드되었다면 최소 5줄, 최대 100줄로 요약해드리겠습니다."},
-        {"role": "user", "content": "해당 파일에서 성명을 알고 싶어요."},
-        {"role": "assistant", "content": "해당 pdf의 내용에서 성명을 알고 싶으시군요. 이 pdf는 누구의 것입니다."}
-    ],
-    "QnA": [
-        {"role": "user", "content": "수박에 대한 문제를 만들어 주세요."},
-        {"role": "assistant", "content": "문제: 수박의 특징에 대해 설명하시오.\n답: 수박은 열대 과일이며 겉이 초록색이고 속이 빨갛습니다."},
-        {"role": "user", "content": "객관식 문제를 만들어 주세요."},
-        {"role": "assistant", "content": "문제: 다음 중 틀린 것을 고르시오.\na. 수박은 나무에서 자란다.\nb. 수박은 겉이 초록색이다.\nc. 수박은 물을 좋아한다.\nd. 위 내용 중 틀린 것은 하나이다."},
-        {"role": "user", "content": "논술형 문제를 만들어 주세요."},
-        {"role": "assistant", "content": "문제) 수박의 주요 특징과 생육 환경에 대해 논하시오.\n답: 수박은 열대과일로, 겉이 초록색이고 속은 빨간색이다. 또한, 씨가 있으며 넝쿨에서 자란다.\n수박은 따뜻한 기후에서 잘 자라며, 물이 많은 환경을 선호한다."}
-    ]
-}
+few_shot_examples = [
+    {"role": "user", "content": "파일을 요약해 줄 수 있나요?"},
+    {"role": "assistant", "content": "먼저 PDF 파일을 업로드해 주세요. 업로드된 파일이 없으면 요약을 진행할 수 없습니다."},
+    {"role": "user", "content": "파일 요약을 해주세요."},
+    {"role": "assistant", "content": "PDF 파일이 업로드되었다면 최소 5줄, 최대 100줄로 요약해드리겠습니다."},
+    {"role": "user", "content": "해당 파일에서 성명을 알고 싶어요."},
+    {"role": "assistant", "content": "해당 pdf의 내용에서 성명을 알고 싶으시군요. 이 pdf는 누구의 것입니다."},
+    {"role": "user", "content": "수박에 대한 문제를 만들어 주세요."},
+    {"role": "assistant", "content": "문제: 수박의 특징에 대해 설명하시오.\n답: 수박은 열대 과일이며 겉이 초록색이고 속이 빨갛습니다."},
+    {"role": "user", "content": "객관식 문제를 만들어 주세요."},
+    {"role": "assistant", "content": "문제: 다음 중 틀린 것을 고르시오.\na. 수박은 나무에서 자란다.\nb. 수박은 겉이 초록색이다.\nc. 수박은 물을 좋아한다.\nd. 위 내용 중 틀린 것은 하나이다."},
+    {"role": "user", "content": "논술형 문제를 만들어 주세요."},
+    {"role": "assistant", "content": "문제) 수박의 주요 특징과 생육 환경에 대해 논하시오.\n답: 수박은 열대과일로, 겉이 초록색이고 속은 빨간색이다. 또한, 씨가 있으며 넝쿨에서 자란다.\n수박은 따뜻한 기후에서 잘 자라며, 물이 많은 환경을 선호한다."}
+]
 
-# pdf질문인지 예상문제생성인지 (좀 더 고민할 필요o)
-def determine_question_type(user_question):
-    if "PDF" in user_question or "파일" in user_question or "요약" in user_question:
-        return "pdf_questions"
-    return "QnA"
+def generate_response(user_question, class_material):
+    print_intro_message()
 
-def generate_response(user_question):
-    question_type = determine_question_type(user_question)
-
-    selected_prompt = base_prompt[question_type]
-    selected_examples = few_shot_examples[question_type]
-
-    print_intro_message(question_type) #터미널에서 확인차 출력
-
-    document_type = "pdf_questions" if question_type == "pdf_questions" else "QnA"
-    #document_content, metadata = retrieve_similar_document(user_question, document_type)
-    retrieved_documents = retrieve_similar_document(user_question, document_type)
+    document_type = "textbook"
+    retrieved_documents = retrieve_similar_document(class_material, document_type)
 
     if isinstance(retrieved_documents, list):
         formatted_chunks = [
-            format_output(clean_text(content)) for content, _ in retrieved_documents
+            format_output(clean_text(doc.page_content)) for doc in retrieved_documents
         ]
         document_content = "\n\n".join(formatted_chunks)
-        metadata = retrieved_documents[0][1] if retrieved_documents else {}
+        metadata = retrieved_documents[0].metadata if retrieved_documents else {}
     else:
         document_content, metadata = retrieved_documents
 
-    # 프롬프트 구성
-    full_prompt = selected_prompt + selected_examples + [
-        {"role": "user", "content": user_question}
-    ]
-
-    if (question_type == "pdf_questions" or question_type == "QnA") and not document_content:
+    if not document_content:
         response_content = "파일이 업로드되지 않았습니다. PDF 파일을 먼저 업로드해 주세요."
     else:
-        if document_content:
-            full_prompt.append({"role": "user", "content": document_content})
-
-    response = llm.invoke(full_prompt)
-    response_content = response.content
+        full_prompt = base_prompt + few_shot_examples + [
+            {"role": "user", "content": user_question},
+            {"role": "assistant", "content": document_content}
+        ]
+        response = llm.invoke(full_prompt)
+        response_content = response.content
 
     final_response = (
-        #f"{document_content if document_content else ''}\n"
         f"{response_content}\n"
-        f"{metadata['source'] if metadata and 'source' in metadata else '출처 없음'}\n"
+        f"{metadata.get('source', '출처 없음')}\n"
     )
-    print(final_response)  # 터미널 출력
+
+    print(final_response)  # 터미널에 응답 출력
     return final_response
 
 # test
-#with open("C:/Users/easts/OneDrive/바탕 화면/CapstoneDesign_1/김이(010402).pdf", "rb") as pdf_file:
-#    add_pdf_to_vector_store(pdf_file)
-#
-#user_question = "해당 파일에서 어떤 보험 이름이 들어가 있어?"
-#generate_response(user_question)
+# user_question = "운영체제의 목차에 대해 알고싶어."
+# class_material = "이 파일에는 운영체제에 관한 내용이 들어가 있습니다."
+# generate_response(user_question, class_material)
 
 
 """
