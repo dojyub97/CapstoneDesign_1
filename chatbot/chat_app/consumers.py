@@ -11,7 +11,6 @@ from uuid import uuid4
 import time
 import fitz
 
-
 index_name = "langchain-test-index"
 load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -72,6 +71,7 @@ def PdfToDocument(pdf_file):
         }
     )
     return document
+
 def DocumentToChunks(document):
 # 청크화된 문서를 저장할 리스트
     chunks = []

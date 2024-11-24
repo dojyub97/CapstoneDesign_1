@@ -73,11 +73,11 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model=ChatRoom
-        fields=('id', 'user_id', 'chatroom_title','created_at','topic')
+        fields=('user_id', 'chatroom_title','created_at','topic')
         
 # 채팅 메시지
 class ChatMessageSerializer(serializers.ModelSerializer):
     chatroom_id = serializers.PrimaryKeyRelatedField(queryset=ChatRoom.objects.all())
     class Meta:
         model=ChatMessage
-        fields=('id','chatroom_id','sender','text','created_at')
+        fields=('chatroom_id','sender','text','created_at')
