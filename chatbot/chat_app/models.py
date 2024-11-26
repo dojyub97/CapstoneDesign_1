@@ -74,4 +74,4 @@ class ChatMessage(models.Model):
 
 class File(models.Model):
     file_name = models.CharField(max_length=255)
-    content = models.BinaryField()
+    content = models.TextField()

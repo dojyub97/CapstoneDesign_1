@@ -65,15 +65,12 @@ class LogoutView(APIView):
 # Chatting Room CRUD
 class ChatRoomView(APIView):
     def get(self, request, topic):
-        # URL 디코딩
-        decoded_topic = unquote(topic)
-
         # 사용자별로 초기 ChatRoom 생성
-        initial_topics = ["school_info", "textbook"]
+        initial_topics = ["school-info", "pdf-QnA"]
         for initial_topic in initial_topics:
             ChatRoom.objects.get_or_create(user_id=request.user, topic=initial_topic)
 
-        chatroom = ChatRoom.objects.get(user_id=request.user, topic=decoded_topic)
+        chatroom = ChatRoom.objects.get(user_id=request.user, topic=topic)
 
         messages = ChatMessage.objects.filter(chatroom_id=chatroom).order_by(
             "created_at"
@@ -91,7 +88,7 @@ class ChatRoomView(APIView):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 # Chatting message CRUD
-class SchoolInfoChatView(APIView):
+class SchoolInfoView(APIView):
     def post(self, request, chatroom_id):
         try:
             chatroom = ChatRoom.objects.get(id=chatroom_id)
@@ -115,13 +112,54 @@ class SchoolInfoChatView(APIView):
                 )
                 return Response(
                     {
-                        "user_message": serializer.data,
                         "bot_message": ChatMessageSerializer(bot_message).data,
                     },
                     status=status.HTTP_201_CREATED,
                 )
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ChatRoom.DoesNotExist:
+            return Response(
+                {"error": "Chat room not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class pdfQnAView(APIView):
+    def post(self, request, chatroom_id):
+        try:
+            chatroom = ChatRoom.objects.get(id=chatroom_id)
+            chat_serializer = ChatMessageSerializer(data=request.data("chat_data"))
+            file_serializer = PDFfileSerializer(data=request.data("file_data"))
+
+            if chat_serializer.is_valid() and file_serializer.is_valid():
+                chat = chat_serializer.save(chatroom_id=chatroom)
+                file = file_serializer.save()
+
+                input_message = chat_serializer.validated_data.get("text")
+                pdf_text = file_serializer.validated_data.get("content")
+
+                # test
+                print(input_message)
+                # Call prompt-> response bot message
+
+                # pdf 전송
+                output_message = pdf_info.generate_response(input_message)
+                # test
+                print(output_message)
+
+                bot_message = ChatMessage.objects.create(
+                    chatroom_id=chat.chatroom_id,
+                    sender="system",
+                    text=output_message,
+                )
+                return Response(
+                    {
+                        "bot_message": ChatMessageSerializer(bot_message).data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+
+            return Response(chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ChatRoom.DoesNotExist:
             return Response(
                 {"error": "Chat room not found"}, status=status.HTTP_404_NOT_FOUND
