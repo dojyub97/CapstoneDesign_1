@@ -124,6 +124,9 @@ class SchoolInfoView(APIView):
             )
 
 
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+# Chatting message CRUD
 class pdfQnAView(APIView):
     def post(self, request, chatroom_id):
         try:
