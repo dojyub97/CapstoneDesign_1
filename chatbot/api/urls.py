@@ -7,11 +7,15 @@ urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("chatroom/", ChatRoomView.as_view(), name="chatroom"),
     path("chatroom/<str:topic>/", ChatRoomView.as_view(), name="chat-room"),
     path(
-        "chatroom/school-info/<int:chatroom_id>/",
-        SchoolInfoChatView.as_view(),
+        "chatmessage/school-info/<int:chatroom_id>/",
+        SchoolInfoView.as_view(),
+        name="chat-message",
+    ),
+    path(
+        "chatmessage/pdf-QnA/<int:chatroom_id>/",
+        pdfQnAView.as_view(),
         name="chat-message",
     ),
 ]
