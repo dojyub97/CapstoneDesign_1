@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-!tlhgzc3lh0cptzagc*+*y0*p5!*vk(ua%+ovvnk15*2jincoy
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env()
+environ.Env.read_env(env_file=".env")
 
 # Load GEMINI_API_KEY from .env
 GEMINI_API_KEY = env("GEMINI_API_KEY")
