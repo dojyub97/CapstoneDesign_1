@@ -11,11 +11,11 @@ urlpatterns = [
     path(
         "chatmessage/school-info/<int:chatroom_id>/",
         SchoolInfoView.as_view(),
-        name="chat-message",
+        name="school-info",
     ),
     path(
         "chatmessage/pdf-QnA/<int:chatroom_id>/",
         pdfQnAView.as_view(),
-        name="chat-message",
+        name="pdf-QnA",
     ),
 ]

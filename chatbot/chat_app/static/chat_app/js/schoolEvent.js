@@ -20,7 +20,7 @@ export function renderSchoolInfo() {
             currentChatroomId = data.chatroom_id;
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-    <div id="chat-container" class="flex flex-col overflow-y-auto overflow-x-hidden flex-shrink-0 rounded-2xl bg-gray-100 h-full w-full min-w-[30%] max-w-[40%] p-4 break-words">
+    <div id="chat-container" class="flex flex-col flex-shrink-0 rounded-2xl bg-gray-100 min-w-[30%] max-w-[40%] p-4">
         <div id="message-container" class="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden mb-4 break-words">
             <!-- Messages will appear here dynamically -->
         </div>

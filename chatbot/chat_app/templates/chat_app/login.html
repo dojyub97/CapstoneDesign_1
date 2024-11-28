@@ -2,32 +2,35 @@
 
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-    <link rel="stylesheet" href="{% static 'chat_app/css/login.css' %}">
-</head>
-<body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <p id="error-message" class="error-message" style="display: none;">가입되지 않은 사용자입니다.</p>
-        <form id="login-form">
-            <div class="input-container">
-                <input type="text" id="username" placeholder="Enter your username" required>
-            </div>
-            <div class="input-container">
-                <input type="password" id="password" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="login-button">Log In</button>
-        </form>
-        <p class="signup-link">Don’t have an account? <a href="{% url 'chat_app:signUp' %}">Signup Now</a></p>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet" />
+  </head>
+  <body class="flex justify-center items-center h-screen bg-gray-100 font-sans">
+    <div class="w-full max-w-sm p-10 bg-white rounded-lg shadow-md text-center">
+      <h1 class="text-2xl font-bold text-gray-800 mb-5">Login</h1>
+      <p id="error-message" class="text-red-500 text-sm mb-4 hidden">가입되지 않은 사용자입니다.</p>
+      <form id="login-form">
+        <div class="mb-4">
+          <input type="text" id="username" placeholder="Enter your username" required class="w-full p-3 border border-gray-300 rounded-md text-lg" />
+        </div>
+        <div class="mb-4">
+          <input type="password" id="password" placeholder="Enter your password" required class="w-full p-3 border border-gray-300 rounded-md text-lg" />
+        </div>
+        <button type="submit" class="w-full p-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors">Log In</button>
+      </form>
+      <p class="mt-5 text-sm text-gray-600">
+        Don’t have an account?
+        <a href="{% url 'chat_app:signUp' %}" class="text-blue-600 hover:underline">Signup Now</a>
+      </p>
     </div>
 
     <script>
-        const authToken = "{{ authToken }}";
-        localStorage.setItem("authToken", authToken);  // localStorage에 저장하여 다른 JS 파일에서도 접근 가능
+      const authToken = '{{ authToken }}'
+      localStorage.setItem('authToken', authToken) // localStorage에 저장하여 다른 JS 파일에서도 접근 가능
     </script>
-    <script src="{% static 'chat_app//js/loginEvent.js' %}"></script>
-</body>
+    <script src="{% static 'chat_app/js/loginEvent.js' %}"></script>
+  </body>
 </html>

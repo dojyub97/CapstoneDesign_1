@@ -1,8 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 
 def chatbot_view(request):
-    return render(request, "chat_app/chatbot.html")
+    access_token = request.session.get("access_token")
+    if not access_token:
+        return redirect("chat_app:login")
+    else:
+        return render(request, "chat_app/chatbot.html")
 
 
 def login_view(request):

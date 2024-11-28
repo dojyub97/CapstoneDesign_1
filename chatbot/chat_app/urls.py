@@ -4,8 +4,7 @@ from .views import *
 app_name = "chat_app"
 
 urlpatterns = [
-    path("", login_view, name="login"),
     path("login/", login_view, name="login"),
     path("signup/", signup_view, name="signUp"),
-    path("chatbot/home/", chatbot_view, name="chatbot"),
+    path("", chatbot_view, name="home"),
 ]
