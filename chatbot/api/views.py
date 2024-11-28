@@ -32,6 +32,7 @@ class LoginView(APIView):
             access = serializer.validated_data.get("access_token")
             refresh = serializer.validated_data.get("refresh_token")
 
+            request.session["access_token"] = access
             return Response(
                 {
                     "user_id": user.id,
@@ -136,17 +137,18 @@ class pdfQnAView(APIView):
 
             if chat_serializer.is_valid() and file_serializer.is_valid():
                 chat = chat_serializer.save(chatroom_id=chatroom)
-                file = file_serializer.save()
+                file_serializer.save()
 
                 input_message = chat_serializer.validated_data.get("text")
                 pdf_text = file_serializer.validated_data.get("content")
 
                 # test
                 print(input_message)
+                print(pdf_text)
                 # Call prompt-> response bot message
 
-                # pdf 전송
-                output_message = pdf_info.generate_response(input_message)
+                # pdf_info: generate_response(user_question, class_material)
+                output_message = pdf_info.generate_response(input_message, pdf_text)
                 # test
                 print(output_message)
 

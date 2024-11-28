@@ -1,5 +1,5 @@
 export function renderHome() {
-    window.location.href = `/home/`;
+    window.history.pushState({}, '', `/`);
     const mainContainer = document.getElementById("main-container");
     mainContainer.innerHTML = `
     <div class="flex flex-col w-full h-full flex-auto flex-shrink-0 rounded-2xl bg-gray-100 overflow-x-auto mb-4 items-center justify-center">
