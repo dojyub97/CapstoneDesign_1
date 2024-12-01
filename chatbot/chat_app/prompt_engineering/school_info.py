@@ -15,7 +15,8 @@ base_prompt = [
             "학생들이 질문하기 편하게 예의를 갖춘 상담원 같은 느낌으로 대해줬으면 좋겠습니다."
             "학생들이 반말로 질문하면 편하게 반말로 대해주고 ~인가요? 와 같이 존댓말로 질문할 경우 똑같이 정중하게 존댓말로 대해주세요."
             "문장에서는 상관없지만 사과와 같은 단어 한개의 출력에 있어 한가지 언어만 사용했으면 좋겠습니다."
-            "학교 홈페이지 관련 정보나 학사일정에 관한 질문에는 필요한 링크나 탐색 경로를 안내해 주세요."
+            "학교 홈페이지 관련 정보나 학사일정에 관한 질문에는 필요한 정보만을 안내해 주세요."
+            "답변 생성에 있어 문단 간 개행과 목록으로 보기 좋게 정리해주세요."
         ),
     }
 ]
@@ -41,6 +42,17 @@ few_shot_examples = [
         "content": (
             "공지사항은 학교 홈페이지의 '학교 소식' 탭에서 확인할 수 있어요. "
             "메인 화면 상단 메뉴에서 '학교 소식'을 클릭해 주세요."
+        )
+    },
+    {
+        "role": "user",
+        "content": "국가장학금은 언제 신청해요?"
+    },
+    {
+        "role": "assistant",
+        "content": (
+            "국가장학금은 2024년 8월 18일부터 9월 11일까지 신청할 수 있어요."
+            "서류제출 및 가구원 동의 기간은 2024년 8월 14일부터 9월 13일까지에요."
         )
     }
 ]
@@ -77,14 +89,17 @@ def generate_response(user_question):
     # 프롬프트 완성 - 기본 프롬프트 + 예시 + 사용자 질문
     full_prompt = base_prompt + few_shot_examples + [
         {"role": "user", "content": user_question},
-        {"role": "assistant", "content": page_content}
+        {"role": "assistant", "content": "다음과 같은 데이터를 참고하여 대답하세요:\n" + page_content}
     ]
+    #print("Full Prompt:", full_prompt)  # full_prompt를 출력
     response = llm.invoke(full_prompt)
 
     final_response = (
-        f"{page_content}\n"
-        f"{metadata['source'] if metadata and 'source' in metadata else '출처 없음'}\n"
-        f"{response.content}"   
+        f"{response.content}\n"
+        f"{metadata['source'] if metadata and 'source' in metadata else '출처 없음'}\n"  
     )
     print(final_response) #터미널 출력
     return final_response
+
+#user_question = "2024학년도 동계 현장실습은 언제 신청해?"
+#generate_response(user_question)
