@@ -28,10 +28,9 @@ document.getElementById('login-form').addEventListener('submit', function (event
             // JSON 응답 처리
             if (data.access_token) {
                 localStorage.setItem('access_token', data.access_token);
-                sessionStorage.setItem('refresh_token', data.refresh_token);
 
                 // 여러 개의 채팅방일 경우 list로 변경해야 함
-                window.location.href = `/`;
+                window.location.href = `/home/`;
             } else {
                 errorMessage.style.display = 'block';
                 errorMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
@@ -39,6 +38,7 @@ document.getElementById('login-form').addEventListener('submit', function (event
         })
         .catch(errorData => {
             // 서버에서 반환된 오류 메시지를 화면에 표시
+            console.log(errorData);
             errorMessage.style.display = 'block';
             if (errorData.non_field_errors) {
                 errorMessage.textContent = '가입되지 않은 사용자이거나 비밀번호가 잘못되었습니다.';

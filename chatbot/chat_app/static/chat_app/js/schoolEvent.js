@@ -1,9 +1,11 @@
 export function renderSchoolInfo() {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem('access_token');
     if (!token) {
         console.error("No access token found. Please log in again.");
         return;
     }
+
+    console.log(token);
 
     let topic = "school-info";
     let currentChatroomId = null;
@@ -20,8 +22,8 @@ export function renderSchoolInfo() {
             currentChatroomId = data.chatroom_id;
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-    <div id="chat-container" class="flex flex-col flex-shrink-0 rounded-2xl bg-gray-100 min-w-[30%] max-w-[40%] p-4">
-        <div id="message-container" class="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden mb-4 break-words">
+    <div id="chat-container" class="flex flex-col flex-wrap flex-auto flex-shrink-0 rounded-2xl bg-gray-100 overflow-x-auto mb-4 p-4 ">
+        <div id="message-container" class="flex flex-col max-w-[100px] mb-4 p-4">
             <!-- Messages will appear here dynamically -->
         </div>
         <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4">
@@ -106,7 +108,7 @@ export function renderSchoolInfo() {
             messageElement.className = "flex items-start mb-4";
             messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
-                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)]">${message}</div>
+                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-full sm:max-w-[75%]">${message}</div>
                 `;
         }
 
