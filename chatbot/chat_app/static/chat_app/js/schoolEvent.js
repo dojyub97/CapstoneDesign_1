@@ -22,32 +22,28 @@ export function renderSchoolInfo() {
             currentChatroomId = data.chatroom_id;
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-    <div id="chat-container" class="flex flex-col flex-wrap flex-auto flex-shrink-0 rounded-2xl bg-gray-100 overflow-x-auto mb-4 p-4 ">
-        <div id="message-container" class="flex flex-col max-w-[100px] mb-4 p-4">
-            <!-- Messages will appear here dynamically -->
-        </div>
-        <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4">
-            <div class="flex-grow ml-4">
-                <input 
-                    id="chat-input" 
-                    type="text" 
-                    placeholder="Type a message..." 
-                    class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" 
-                />
-            </div>
-            <div class="ml-4">
-                <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1">
-                    <span>Send</span>
-                    <span class="ml-2">
-                        <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
-                    </span>
-                </button>
-            </div>
-        </div>
-    </div>
-`;
+                <div id="chat-container" class="flex flex-col flex-shrink-0 rounded-2xl bg-gray-100 w-full max-w-[900px] p-4 ">
+                    <div id="message-container" class="flex flex-col p-4 overflow-y-auto break-words w-full max-w-full h-full">
+                        <!-- Messages will appear here dynamically -->
+                    </div>
+                    <!-- Input section -->
+                    <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4">
+                        <div class="flex-grow ml-4">
+                            <input id="chat-input" type="text" placeholder="Type a message..." class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+                        </div>
+                        <div class="ml-4">
+                            <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1">
+                                <span>Send</span>
+                                <span class="ml-2">
+                                    <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
 
             data.messages.forEach(message => {
                 displayMessage("User", message.user_message);
@@ -101,14 +97,14 @@ export function renderSchoolInfo() {
         if (sender === "user") {
             messageElement.className = "flex justify-end mb-4";
             messageElement.innerHTML = `
-                    <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)] ">${message}</div>
+                    <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-2rem)] ">${message}</div>
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">U</div>
                 `;
         } else {
             messageElement.className = "flex items-start mb-4";
             messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
-                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-full sm:max-w-[75%]">${message}</div>
+                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl break-all overflow-y-auto max-w-[calc(100%-2rem)]">${message}</div>
                 `;
         }
 
