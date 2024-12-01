@@ -32,6 +32,7 @@ class LoginView(APIView):
             access = serializer.validated_data.get("access_token")
             refresh = serializer.validated_data.get("refresh_token")
 
+            request.session["refresh_token"] = refresh
             request.session["access_token"] = access
             return Response(
                 {

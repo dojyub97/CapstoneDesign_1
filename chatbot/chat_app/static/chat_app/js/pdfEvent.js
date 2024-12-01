@@ -21,19 +21,22 @@ export function renderPDFGenerator() {
             currentChatroomId = data.chatroom_id;
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-                <div id="pdf-container" class="flex flex-col basis-1/3 min-w-[300px] max-w-[33%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
+                <div id="pdf-container" class="flex flex-col flex-grow basis-1/3 min-w-[300px] max-w-[33%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
                     <h2 class="text-lg font-bold mb-4 text-gray-700">Upload PDF</h2>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
+                    <div class="flex flex-col space-y-2 overflow-y-auto border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
                         <label for="pdf-upload" class="block text-gray-500">
                             <i class="fas fa-file-upload text-gray-400 text-3xl mb-2"></i>
                             <span>Upload PDF</span>
                         </label>
                         <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" />
-                        <div id="pdf-preview" class=" mt-4 max-h-[500px] overflow-y-auto">
-                            <button id="process-pages" class="mt-4 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg  border border-gray-200">
-                                Process Selected Pages
-                            </button>
+                        <div id="pdf-preview" class="flex flex-col mt-4 space-y-4 overflow-y-auto">
                         </div>
+                        <button id="process-pages" class="hidden mt-4 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg border border-gray-200">
+                                Process Selected Pages
+                        </button>
+                        <button id="delete-file" class="hidden mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg border border-gray-200">
+                                Delete PDF
+                        </button>
                     </div>
                 </div>
 
@@ -43,7 +46,7 @@ export function renderPDFGenerator() {
                         <!-- Messages will appear here dynamically -->
                     </div>
                     <!-- Input section -->
-                    <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4">
+                    <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4 ">
                         <div class="flex-grow ml-4">
                             <input id="chat-input" type="text" placeholder="Type a message..." class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
                         </div>
@@ -68,15 +71,22 @@ export function renderPDFGenerator() {
     function setupPDFUpload() {
         const pdfUploadInput = document.getElementById("pdf-upload");
         const pdfPreview = document.getElementById("pdf-preview");
+        const pdfLabel = document.querySelector("label[for='pdf-upload']");
         const processPagesButton = document.getElementById("process-pages");
+        const deleteButton = document.getElementById("delete-file");
 
         let loadPdf = null;
         let selectedPagesText = {};
 
+        processPagesButton.classList.add("hidden");
+        deleteButton.classList.add("hidden")
+
         pdfUploadInput.addEventListener("change", async (event) => {
             const file = event.target.files[0];
-
             if (file && file.type === "application/pdf") {
+                // Label 숨기기
+                pdfLabel.classList.add("hidden");
+
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const typeArray = new Uint8Array(e.target.result);
@@ -89,11 +99,11 @@ export function renderPDFGenerator() {
                     // 각 페이지 렌더링
                     for (let i = 1; i <= loadPdf.numPages; i++) {
                         const currentPage = await loadPdf.getPage(i);
-                        const viewport = currentPage.getViewport({ scale: 1.5 });
+                        const viewport = currentPage.getViewport({ scale: 0.5 });
 
                         // Render canvas
                         const canvas = document.createElement("canvas");
-                        canvas.className = "flex flex-shrink-0 mb-4 shadow border rounded";
+                        canvas.className = "flex flex-col mb-4 shadow border rounded max-w-full h-auto";
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
 
@@ -101,9 +111,9 @@ export function renderPDFGenerator() {
                         await currentPage.render({ canvasContext: context, viewport: viewport }).promise;
 
                         const pagePreview = document.createElement("div");
-                        pagePreview.className = "flex overflow-x-auto items-center justify-between mb-2 border p-2 rounded-lg bg-white";
+                        pagePreview.className = "flex items-center justify-between mb-2 border p-2 rounded-lg bg-white ";
                         const pageLabel = document.createElement("label");
-                        pageLabel.className = "flex overflow-x-hidden items-center cursor-pointer";
+                        pageLabel.className = "flex items-center cursor-pointer";
                         pageLabel.innerHTML = `
                             <input type="checkbox" class="mr-2" data-page="${i}" />
                             <span>Page ${i}</span>
@@ -118,7 +128,34 @@ export function renderPDFGenerator() {
                     }
                 };
                 reader.readAsArrayBuffer(file);
+                // processPagesButton & deleteBUtton 활성화
+                processPagesButton.classList.remove("hidden");
+                deleteButton.classList.remove("hidden")
             }
+        });
+
+        deleteButton.addEventListener("click", () => {
+            // PDF 미리보기 삭제
+            pdfPreview.innerHTML = "";
+            pdfUploadInput.value = null;
+
+            // Label 다시 표시
+            pdfLabel.classList.remove("hidden");
+            // processPagesButton 숨기기
+            processPagesButton.classList.add("hidden");
+            deleteButton.classList.add("hidden");
+        });
+
+        deleteButton.addEventListener("click", () => {
+            // PDF 미리보기 삭제
+            pdfPreview.innerHTML = "";
+            pdfUploadInput.value = null;
+
+            // Label 다시 표시
+            pdfLabel.classList.remove("hidden");
+            // processPagesButton 숨기기
+            processPagesButton.classList.add("hidden");
+            deleteButton.classList.add("hidden");
         });
 
         // processPageButton

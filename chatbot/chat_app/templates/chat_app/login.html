@@ -26,11 +26,6 @@
         <a href="{% url 'chat_app:signUp' %}" class="text-blue-600 hover:underline">Signup Now</a>
       </p>
     </div>
-
-    <script>
-      const authToken = '{{ authToken }}'
-      localStorage.setItem('authToken', authToken) // localStorage에 저장하여 다른 JS 파일에서도 접근 가능
-    </script>
     <script src="{% static 'chat_app/js/loginEvent.js' %}"></script>
   </body>
 </html>
