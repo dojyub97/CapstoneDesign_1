@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("No access token found. Please log in again.");
         return;
     }
-    console.log(token);
 
     document.getElementById("home-button").addEventListener("click", renderHome);
     document.getElementById("school-button").addEventListener("click", renderSchoolInfo);

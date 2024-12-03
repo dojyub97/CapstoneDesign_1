@@ -5,8 +5,6 @@ export function renderSchoolInfo() {
         return;
     }
 
-    console.log(token);
-
     let topic = "school-info";
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
@@ -23,7 +21,7 @@ export function renderSchoolInfo() {
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
                 <div id="chat-container" class="flex flex-col flex-shrink-0 rounded-2xl bg-gray-100 w-full max-w-[900px] p-4 ">
-                    <div id="message-container" class="flex flex-col p-4 overflow-y-auto break-words w-full max-w-full h-full">
+                    <div id="message-container" class="flex flex-col p-4 break-words w-full max-w-full h-full overflow-y-auto hide-scrollbar ">
                         <!-- Messages will appear here dynamically -->
                     </div>
                     <!-- Input section -->
@@ -46,8 +44,8 @@ export function renderSchoolInfo() {
             `;
 
             data.messages.forEach(message => {
-                displayMessage("User", message.user_message);
-                displayMessage("Bot", message.bot_message);
+                console.log(message);
+                displayMessage(message.sender, message.text);
             });
             // 중복 로직
 
@@ -83,9 +81,8 @@ export function renderSchoolInfo() {
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
-                const botMessage = data.bot_message ? data.bot_message.text : "No response from bot.";
-                displayMessage("Bot", botMessage);
+                const botMessage = data.sender ? data.text : "No response from bot.";
+                displayMessage(data.sender, botMessage);
             })
             .catch(error => console.error("Error:", error));
     }
@@ -97,14 +94,14 @@ export function renderSchoolInfo() {
         if (sender === "user") {
             messageElement.className = "flex justify-end mb-4";
             messageElement.innerHTML = `
-                    <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-2rem)] ">${message}</div>
+                    <div class="mr-2 ml-5 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${message}</div>
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">U</div>
                 `;
-        } else {
+        } else if (sender === "system") {
             messageElement.className = "flex items-start mb-4";
             messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
-                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl break-all overflow-y-auto max-w-[calc(100%-2rem)]">${message}</div>
+                    <div class="ml-2 mr-5 py-3 px-4 bg-gray-200 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${message}</div>
                 `;
         }
 
