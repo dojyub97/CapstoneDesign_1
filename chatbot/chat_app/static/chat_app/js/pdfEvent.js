@@ -19,6 +19,7 @@ export function renderPDFGenerator() {
         .then(response => response.json())
         .then(data => {
             currentChatroomId = data.chatroom_id;
+            // 문제생성 container
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
                 <div id="pdf-container" class="flex flex-col flex-grow basis-1/3 min-w-[300px] max-w-[33%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
@@ -68,6 +69,7 @@ export function renderPDFGenerator() {
         })
         .catch(error => console.error("Error loading chatroom:", error));
 
+    // pdf file 업로드 함수(pdf-container)
     function setupPDFUpload() {
         const pdfUploadInput = document.getElementById("pdf-upload");
         const pdfPreview = document.getElementById("pdf-preview");
@@ -78,15 +80,14 @@ export function renderPDFGenerator() {
         let loadPdf = null;
         let selectedPagesText = {};
 
-        processPagesButton.classList.add("hidden");
-        deleteButton.classList.add("hidden")
-
+        // pdf file upload event
         pdfUploadInput.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (file && file.type === "application/pdf") {
                 // Label 숨기기
                 pdfLabel.classList.add("hidden");
 
+                // pdf file read->load
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const typeArray = new Uint8Array(e.target.result);
@@ -96,20 +97,18 @@ export function renderPDFGenerator() {
 
                     pdfPreview.innerHTML = "";
 
-                    // 각 페이지 렌더링
+                    // render each pdf page
                     for (let i = 1; i <= loadPdf.numPages; i++) {
                         const currentPage = await loadPdf.getPage(i);
                         const viewport = currentPage.getViewport({ scale: 0.5 });
-
                         // Render canvas
                         const canvas = document.createElement("canvas");
                         canvas.className = "flex flex-col mb-4 shadow border rounded max-w-full h-auto";
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
-
                         const context = canvas.getContext("2d");
                         await currentPage.render({ canvasContext: context, viewport: viewport }).promise;
-
+                        // 파일 미리보기(pdf-preview)
                         const pagePreview = document.createElement("div");
                         pagePreview.className = "flex items-center justify-between mb-2 border p-2 rounded-lg bg-white ";
                         const pageLabel = document.createElement("label");
@@ -128,17 +127,24 @@ export function renderPDFGenerator() {
                     }
                 };
                 reader.readAsArrayBuffer(file);
+
                 // processPagesButton & deleteBUtton 활성화
                 processPagesButton.classList.remove("hidden");
                 deleteButton.classList.remove("hidden")
             }
         });
 
+        // pdf page의 text 추출 함수
+        async function extractPageText(currentPage) {
+            const textContent = await currentPage.getTextContent();
+            return textContent.items.map((item) => item.str).join(" ");
+        }
+
+        // Delete pdf file
         deleteButton.addEventListener("click", () => {
             // PDF 미리보기 삭제
             pdfPreview.innerHTML = "";
             pdfUploadInput.value = null;
-
             // Label 다시 표시
             pdfLabel.classList.remove("hidden");
             // processPagesButton 숨기기
@@ -146,28 +152,15 @@ export function renderPDFGenerator() {
             deleteButton.classList.add("hidden");
         });
 
-        deleteButton.addEventListener("click", () => {
-            // PDF 미리보기 삭제
-            pdfPreview.innerHTML = "";
-            pdfUploadInput.value = null;
-
-            // Label 다시 표시
-            pdfLabel.classList.remove("hidden");
-            // processPagesButton 숨기기
-            processPagesButton.classList.add("hidden");
-            deleteButton.classList.add("hidden");
-        });
-
-        // processPageButton
+        // Event handling: extracted pdf text + user message handling
+        // process page button을 클릭한 후에 사용자 입력을 받을 수 있도록 함
         processPagesButton.addEventListener("click", () => {
             const checkboxes = pdfPreview.querySelectorAll("input[type='checkbox']:checked");
             const selectedPages = Array.from(checkboxes).map(checkbox => parseInt(checkbox.dataset.page));
-
             if (selectedPages.length === 0) {
                 alert("Please select at least one page to process.");
                 return;
             }
-
             const selectedText = selectedPages.map((page) => selectedPagesText[page]).join("\n\n");
 
             // Store extracted text for later API submission
@@ -180,68 +173,65 @@ export function renderPDFGenerator() {
                     sendMessage(selectedText);
                 }
             });
-        });
-    }
 
-    async function extractPageText(currentPage) {
-        const textContent = await currentPage.getTextContent();
-        return textContent.items.map((item) => item.str).join(" ");
-    }
+            // send user message
+            function sendMessage(selectedText) {
+                const chatInputElement = document.getElementById("chat-input");
+                const chatInputValue = chatInputElement.value.trim();
+                if (chatInputValue === '') return; // 빈 메시지 전송 방지
 
-    function sendMessage(selectedText) {
-        const chatInputElement = document.getElementById("chat-input");
-        const chatInputValue = chatInputElement.value.trim();
-        if (chatInputValue === '') return; // 빈 메시지 전송 방지
+                displayMessage("user", chatInputValue);
+                chatInputElement.value = "";
 
-        displayMessage("user", chatInputValue);
-        chatInputElement.value = "";
+                fetch(`/api/chatmessage/${topic}/${currentChatroomId}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        "chat_data": {
+                            "chatroom_id": currentChatroomId,
+                            "sender": "user",
+                            "text": chatInputValue
+                        },
+                        "file_data": {
+                            "file_name": "example.pdf",
+                            "content": selectedText
+                        }
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        const botMessage = data.bot_message ? data.bot_message.text : "No response from bot.";
+                        displayMessage("Bot", botMessage);
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
 
-        fetch(`/api/chatmessage/${topic}/${currentChatroomId}/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                "chat_data": {
-                    "chatroom_id": currentChatroomId,
-                    "sender": "user",
-                    "text": chatInputValue
-                },
-                "file_data": {
-                    "file_name": "example.pdf",
-                    "content": selectedText
-                }
-            }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                const botMessage = data.bot_message ? data.bot_message.text : "No response from bot.";
-                displayMessage("Bot", botMessage);
-            })
-            .catch(error => console.error("Error:", error));
-    }
+            // display에 chatting message 출력
+            function displayMessage(sender, message) {
+                const messageElement = document.createElement("div");
+                const messageContainer = document.getElementById("message-container");
 
-    function displayMessage(sender, message) {
-        const messageElement = document.createElement("div");
-        const messageContainer = document.getElementById("message-container");
-
-        if (sender === "user") {
-            messageElement.className = "flex justify-end mb-4";
-            messageElement.innerHTML = `
+                if (sender === "user") {
+                    messageElement.className = "flex justify-end mb-4";
+                    messageElement.innerHTML = `
                     <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)] ">${message}</div>
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">U</div>
                 `;
-        } else {
-            messageElement.className = "flex items-start mb-4";
-            messageElement.innerHTML = `
+                } else {
+                    messageElement.className = "flex items-start mb-4";
+                    messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
                     <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)]">${message}</div>
                 `;
-        }
-        messageContainer.appendChild(messageElement);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+                }
+                messageContainer.appendChild(messageElement);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+        });
     }
 
 }

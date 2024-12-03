@@ -54,8 +54,8 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             # 세션에서 토큰 삭제
-            if "authToken" in request.session:
-                del request.session["authToken"]
+            if "access_token" in request.session:
+                del request.session["access_token"]
             request.user.auth_token.delete()
             return Response(status=status.HTTP_200_OK)
         except (AttributeError, Token.DoesNotExist):
@@ -67,12 +67,20 @@ class LogoutView(APIView):
 # Chatting Room CRUD
 class ChatRoomView(APIView):
     def get(self, request, topic):
-        # 사용자별로 초기 ChatRoom 생성
+
         initial_topics = ["school-info", "pdf-QnA"]
         for initial_topic in initial_topics:
             ChatRoom.objects.get_or_create(user_id=request.user, topic=initial_topic)
 
         chatroom = ChatRoom.objects.get(user_id=request.user, topic=topic)
+
+        if not chatroom:
+            # 사용자별로 초기 ChatRoom 생성
+            initial_topics = ["school-info", "pdf-QnA"]
+            for initial_topic in initial_topics:
+                ChatRoom.objects.get_or_create(
+                    user_id=request.user, topic=initial_topic
+                )
 
         messages = ChatMessage.objects.filter(chatroom_id=chatroom).order_by(
             "created_at"
@@ -89,7 +97,7 @@ class ChatRoomView(APIView):
 
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-# Chatting message CRUD
+# 학사 정보 api
 class SchoolInfoView(APIView):
     def post(self, request, chatroom_id):
         try:
@@ -100,21 +108,22 @@ class SchoolInfoView(APIView):
                 chat_message = serializer.save(chatroom_id=chatroom)
                 input_message = serializer.validated_data.get("text")
 
-                # test
-                print(input_message)
                 # Call prompt-> response bot message
                 output_message = school_info.generate_response(input_message)
-                # test
-                print(output_message)
 
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat_message.chatroom_id,
                     sender="system",
                     text=output_message,
                 )
+
+                bot_serializer = ChatMessageSerializer(data=bot_message.data)
+                bot_serializer.save(chatroom_id=chatroom)
+
                 return Response(
                     {
-                        "bot_message": ChatMessageSerializer(bot_message).data,
+                        "sender": bot_message.sender,
+                        "text": bot_message.text,
                     },
                     status=status.HTTP_201_CREATED,
                 )

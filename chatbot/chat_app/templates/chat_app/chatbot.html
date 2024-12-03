@@ -42,6 +42,17 @@
           <!-- Dynamically Section -->
         </div>
       </div>
+      <style>
+        /* 사용자 정의 스크롤바 스타일 */
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none; /* Webkit 브라우저에서 스크롤바 숨기기 */
+        }
+        
+        .hide-scrollbar {
+          -ms-overflow-style: none; /* IE, Edge 스크롤바 숨기기 */
+          scrollbar-width: none; /* Firefox 스크롤바 숨기기 */
+        }
+      </style>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>

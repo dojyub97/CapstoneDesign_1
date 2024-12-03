@@ -14,8 +14,8 @@ def chatbot_view(request):
     # 2. Access Token 검증
     if not token:
         return redirect("chat_app:login")
-
-    return render(request, "chat_app/chatbot.html")
+    else:
+        return render(request, "chat_app/chatbot.html")
 
 
 def login_view(request):
