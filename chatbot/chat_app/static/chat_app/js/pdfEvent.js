@@ -43,7 +43,7 @@ export function renderPDFGenerator() {
 
                 <!-- Chat Section -->
                 <div id="chat-container" class="flex flex-col flex-grow basis-2/3 min-w-[500px] max-w-[67%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
-                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden mb-4 break-words">
+                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden mb-4 break-words hide-scrollbar">
                         <!-- Messages will appear here dynamically -->
                     </div>
                     <!-- Input section -->
@@ -79,6 +79,7 @@ export function renderPDFGenerator() {
 
         let loadPdf = null;
         let selectedPagesText = {};
+        let fileName = null;
 
         // pdf file upload event
         pdfUploadInput.addEventListener("change", async (event) => {
@@ -88,6 +89,7 @@ export function renderPDFGenerator() {
                 pdfLabel.classList.add("hidden");
 
                 // pdf file read->load
+                fileName = file.name;
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const typeArray = new Uint8Array(e.target.result);
@@ -183,7 +185,7 @@ export function renderPDFGenerator() {
                 displayMessage("user", chatInputValue);
                 chatInputElement.value = "";
 
-                fetch(`/api/chatmessage/${topic}/${currentChatroomId}/`, {
+                fetch(`/api/${topic}/${currentChatroomId}/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -196,16 +198,15 @@ export function renderPDFGenerator() {
                             "text": chatInputValue
                         },
                         "file_data": {
-                            "file_name": "example.pdf",
+                            "file_name": fileName,
                             "content": selectedText
                         }
                     }),
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
-                        const botMessage = data.bot_message ? data.bot_message.text : "No response from bot.";
-                        displayMessage("Bot", botMessage);
+                        const botMessage = data.sender ? data.text : "No response from bot.";
+                        displayMessage(data.sender, botMessage);
                     })
                     .catch(error => console.error("Error:", error));
             }
@@ -218,16 +219,17 @@ export function renderPDFGenerator() {
                 if (sender === "user") {
                     messageElement.className = "flex justify-end mb-4";
                     messageElement.innerHTML = `
-                    <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)] ">${message}</div>
+                    <div class="mr-2 ml-5 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${message}</div>
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">U</div>
                 `;
-                } else {
+                } else if (sender === "system") {
                     messageElement.className = "flex items-start mb-4";
                     messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
-                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)]">${message}</div>
+                    <div class="ml-2 mr-5 py-3 px-4 bg-gray-200 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${message}</div>
                 `;
                 }
+
                 messageContainer.appendChild(messageElement);
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }

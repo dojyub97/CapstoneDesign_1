@@ -27,10 +27,10 @@ SECRET_KEY = "django-insecure-!tlhgzc3lh0cptzagc*+*y0*p5!*vk(ua%+ovvnk15*2jincoy
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env(env_file=".env")
+environ.Env.read_env()
 
 # Load GEMINI_API_KEY from .env
-GEMINI_API_KEY = env("GEMINI_API_KEY")
+GEMINI_API_KEY = env("GEMINI_API_KEY", default=None)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "chat_app",
     "django_plotly_dash",
     "rest_framework.authtoken",
+    "rest_framework_simplejwt",
 ]
 
 LOGIN_URL = "/admin/login/"
@@ -76,7 +77,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "https://chatbotdemo",
-    "http://13.125.195.52"
+    "http://13.125.195.52",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -140,7 +141,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Adjust as needed
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),

@@ -5,6 +5,7 @@ export function renderSchoolInfo() {
         return;
     }
 
+    console.log(token);
     let topic = "school-info";
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
@@ -44,7 +45,6 @@ export function renderSchoolInfo() {
             `;
 
             data.messages.forEach(message => {
-                console.log(message);
                 displayMessage(message.sender, message.text);
             });
             // 중복 로직
@@ -71,7 +71,7 @@ export function renderSchoolInfo() {
         displayMessage("user", chatInputValue);
         chatInputElement.value = "";
 
-        fetch(`/api/chatmessage/school-info/${currentChatroomId}/`, {
+        fetch(`/api/school-info/${currentChatroomId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -108,5 +108,4 @@ export function renderSchoolInfo() {
         messageContainer.appendChild(messageElement);
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
-
 }

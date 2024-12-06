@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import authentication_classes, permission_classes
+from django.http import JsonResponse
 
 from .serializers import *
 from urllib.parse import unquote
@@ -32,8 +33,9 @@ class LoginView(APIView):
             access = serializer.validated_data.get("access_token")
             refresh = serializer.validated_data.get("refresh_token")
 
-            request.session["refresh_token"] = refresh
-            request.session["access_token"] = access
+            user.refresh_token = refresh
+            user.save()
+
             return Response(
                 {
                     "user_id": user.id,
@@ -45,6 +47,37 @@ class LoginView(APIView):
 
         # If serializer is not valid, return error response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TokenRefreshView(APIView):
+    def post(self, request):
+        access_token = request.header.get("Authorization").split(" ")[1]
+        refresh_token = request.data.get("refresh_token")
+
+        if not access_token:
+            return Response(
+                {"error": "Access token is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filer(refresh_token=refresh_token).first()
+        if user:
+            try:
+                # Refresh Token으로 새로운 Access Token 생성
+                token = RefreshToken(refresh_token)
+                new_access = str(token.access_token)
+
+                return Response({"access_token": new_access}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(
+                    {"error": "Invalid token."}, status=status.HTTP_401_UNAUTHORIZED
+                )
+        return Response(
+            {"error": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    def get(self, request):
+        return Response({"message": "Token is valid."}, status=status.HTTP_200_OK)
 
 
 @permission_classes([IsAuthenticated])
@@ -137,7 +170,7 @@ class SchoolInfoView(APIView):
 
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
-# Chatting message CRUD
+# pdf+예상질문 api
 class pdfQnAView(APIView):
     def post(self, request, chatroom_id):
         try:
@@ -152,24 +185,22 @@ class pdfQnAView(APIView):
                 input_message = chat_serializer.validated_data.get("text")
                 pdf_text = file_serializer.validated_data.get("content")
 
-                # test
-                print(input_message)
-                print(pdf_text)
-                # Call prompt-> response bot message
-
                 # pdf_info: generate_response(user_question, class_material)
                 output_message = pdf_info.generate_response(input_message, pdf_text)
-                # test
-                print(output_message)
 
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat.chatroom_id,
                     sender="system",
                     text=output_message,
                 )
+
+                bot_serializer = ChatMessageSerializer(data=bot_message.data)
+                bot_serializer.save(chatroom_id=chatroom)
+
                 return Response(
                     {
-                        "bot_message": ChatMessageSerializer(bot_message).data,
+                        "sender": bot_message.sender,
+                        "text": bot_message.text,
                     },
                     status=status.HTTP_201_CREATED,
                 )
