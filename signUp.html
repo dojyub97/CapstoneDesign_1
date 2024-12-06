@@ -1,0 +1,37 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  </head>
+  <body class="flex justify-center items-center min-h-screen bg-gray-100 font-sans">
+    <div class="w-full max-w-md p-10 bg-white rounded-lg shadow-lg text-center">
+      <h1 class="text-2xl font-bold text-blue-600 mb-5">Create account!</h1>
+      <p id="error-message" class="text-red-500 text-sm mb-4 hidden"></p>
+      <form id="signup-form">
+        <div class="mb-5">
+          <input type="text" id="username" placeholder="Name" required class="w-full p-3 border border-gray-300 rounded-md text-lg" />
+        </div>
+        <div class="mb-5">
+          <input type="password" id="password" placeholder="Password" required class="w-full p-3 border border-gray-300 rounded-md text-lg" />
+        </div>
+        <div class="mb-5">
+          <input type="password" id="password2" placeholder="Confirm Password" required class="w-full p-3 border border-gray-300 rounded-md text-lg" />
+        </div>
+        <button type="submit" class="w-full p-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors">Create ➔</button>
+      </form>
+      <p class="mt-5 text-sm text-gray-600">
+        Already have an account?
+        <a href="{% url 'chat_app:login' %}" class="text-blue-600 hover:underline">Login</a>
+      </p>
+    </div>
+
+    <script src="{% static 'chat_app/js/signUpEvent.js' %}"></script>
+  </body>
+</html>
