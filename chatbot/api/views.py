@@ -8,7 +8,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from django.http import JsonResponse
 
 from .serializers import *
-from chat_app.prompt_engineering import school_info, pdf_info
+from chat_app.prompt_engineering import school_info, pdf_info, 차세대카테고리찾기
 
 
 @permission_classes([AllowAny])
@@ -101,9 +101,7 @@ class LogoutView(APIView):
 # Chatting Room CRUD
 class ChatRoomView(APIView):
     def get(self, request, topic):
-        print("chatroomView안에는 들어옴")
-
-        initial_topics = ["school-info", "pdf-QnA"]
+        initial_topics = ["school-info", "textbook","KnuIn"]
         for initial_topic in initial_topics:
             ChatRoom.objects.get_or_create(user_id=request.user, topic=initial_topic)
 
@@ -111,7 +109,7 @@ class ChatRoomView(APIView):
 
         if not chatroom:
             # 사용자별로 초기 ChatRoom 생성
-            initial_topics = ["school-info", "pdf-QnA"]
+            initial_topics = ["school-info", "textbook","KnuIn"]
             for initial_topic in initial_topics:
                 ChatRoom.objects.get_or_create(
                     user_id=request.user, topic=initial_topic
@@ -143,8 +141,17 @@ class SchoolInfoView(APIView):
                 chat_message = serializer.save(chatroom_id=chatroom)
                 input_message = serializer.validated_data.get("text")
 
+                print(chatroom.topic)
+
                 # Call prompt-> response bot message
-                output_message = school_info.generate_response(input_message)
+                if chatroom.topic== "school_info":
+                    message = school_info.generate_response(input_message)
+                elif chatroom.topic=="KnuIn":
+                    message = 차세대카테고리찾기.chatbot_rag(input_message)
+
+                output_message = message
+
+                print(output_message)
 
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat_message.chatroom_id,
@@ -185,12 +192,11 @@ class pdfQnAView(APIView):
                 input_message = chat_serializer.validated_data.get("text")
                 pdf_text = file_serializer.validated_data.get("content")
                 
-                
+                print(pdf_text)
 
                 # pdf_info: generate_response(user_question, class_material)
                 output_message = pdf_info.generate_response(input_message, pdf_text)
 
-                print(output_message)
                 bot_message = ChatMessage.objects.create(
                     chatroom_id=chat.chatroom_id,
                     sender="system",

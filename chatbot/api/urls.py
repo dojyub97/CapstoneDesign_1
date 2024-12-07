@@ -15,6 +15,11 @@ urlpatterns = [
         name="school-info",
     ),
     path(
+        "KnuIn/<int:chatroom_id>/",
+        SchoolInfoView.as_view(),
+        name="KnuIn",
+    ),
+    path(
         "pdf-QnA/<int:chatroom_id>/",
         pdfQnAView.as_view(),
         name="pdf-QnA",

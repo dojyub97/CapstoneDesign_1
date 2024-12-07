@@ -75,7 +75,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    "https://chatbotdemo",
+    "https://chatbotdemo.com",
     "http://13.125.195.52:8000",
 ]
 CORS_ORIGIN_ALLOW_ALL = True

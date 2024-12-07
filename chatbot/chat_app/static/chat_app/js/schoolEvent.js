@@ -1,17 +1,9 @@
 import { fetchWithToken } from "./tokenEvent.js";
 
-
-export function renderSchoolInfo() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        console.error("No access token found. Please log in again.");
-        return;
-    }
-
-    console.log(token);
-    let topic = "school-info";
+export function renderSchoolInfo(topic) {
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
+    console.log(topic);
 
     fetchWithToken(`/api/chatroom/${topic}/`, {
         method: "GET",
@@ -71,7 +63,7 @@ export function renderSchoolInfo() {
         displayMessage("user", chatInputValue);
         chatInputElement.value = "";
 
-        fetchWithToken(`/api/school-info/${currentChatroomId}/`, {
+        fetchWithToken(`/api/${topic}/${currentChatroomId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
