@@ -8,7 +8,9 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("chatroom/<str:topic>/", ChatRoomView.as_view(), name="chat-room"),
+
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+  
     path(
         "school-info/<int:chatroom_id>/",
         SchoolInfoView.as_view(),
@@ -19,4 +21,5 @@ urlpatterns = [
         pdfQnAView.as_view(),
         name="pdf-QnA",
     ),
+    path("차세대/",차세대카테고리검색),
 ]
