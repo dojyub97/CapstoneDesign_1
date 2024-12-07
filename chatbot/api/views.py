@@ -150,14 +150,9 @@ class SchoolInfoView(APIView):
                     text=output_message,
                 )
 
-                bot_serializer = ChatMessageSerializer(data=bot_message.data)
-                bot_serializer.save(chatroom_id=chatroom)
+                bot_serializer = ChatMessageSerializer(bot_message)
 
-                return Response(
-                    {
-                        "sender": bot_message.sender,
-                        "text": bot_message.text,
-                    },
+                return Response(bot_serializer.data,
                     status=status.HTTP_201_CREATED,
                 )
 
@@ -175,8 +170,11 @@ class pdfQnAView(APIView):
     def post(self, request, chatroom_id):
         try:
             chatroom = ChatRoom.objects.get(id=chatroom_id)
-            chat_serializer = ChatMessageSerializer(data=request.data("chat_data"))
-            file_serializer = PDFfileSerializer(data=request.data("file_data"))
+            chat_data = request.data.get("chat_data")
+            file_data = request.data.get("file_data")
+
+            chat_serializer = ChatMessageSerializer(data=chat_data)
+            file_serializer = PDFfileSerializer(data=file_data)
 
             if chat_serializer.is_valid() and file_serializer.is_valid():
                 chat = chat_serializer.save(chatroom_id=chatroom)
@@ -184,6 +182,8 @@ class pdfQnAView(APIView):
 
                 input_message = chat_serializer.validated_data.get("text")
                 pdf_text = file_serializer.validated_data.get("content")
+                
+                print(pdf_text)
 
                 # pdf_info: generate_response(user_question, class_material)
                 output_message = pdf_info.generate_response(input_message, pdf_text)
@@ -194,18 +194,19 @@ class pdfQnAView(APIView):
                     text=output_message,
                 )
 
-                bot_serializer = ChatMessageSerializer(data=bot_message.data)
-                bot_serializer.save(chatroom_id=chatroom)
+                bot_serializer = ChatMessageSerializer(bot_message)
 
-                return Response(
-                    {
-                        "sender": bot_message.sender,
-                        "text": bot_message.text,
-                    },
+                return Response(bot_serializer.data,
                     status=status.HTTP_201_CREATED,
                 )
 
-            return Response(chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Return validation errors
+            errors = {
+                "chat_errors": chat_serializer.errors,
+                "file_errors": file_serializer.errors,
+            }
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
         except ChatRoom.DoesNotExist:
             return Response(
                 {"error": "Chat room not found"}, status=status.HTTP_404_NOT_FOUND

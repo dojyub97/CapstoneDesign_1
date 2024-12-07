@@ -1,3 +1,6 @@
+import { fetchWithToken } from "./tokenEvent.js";
+
+
 export function renderSchoolInfo() {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -10,11 +13,8 @@ export function renderSchoolInfo() {
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
 
-    fetch(`/api/chatroom/${topic}/`, {
+    fetchWithToken(`/api/chatroom/${topic}/`, {
         method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-        },
     })
         .then(response => response.json())
         .then(data => {
@@ -71,11 +71,10 @@ export function renderSchoolInfo() {
         displayMessage("user", chatInputValue);
         chatInputElement.value = "";
 
-        fetch(`/api/school-info/${currentChatroomId}/`, {
+        fetchWithToken(`/api/school-info/${currentChatroomId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({ chatroom_id: currentChatroomId, sender: 'user', text: chatInputValue }),
         })
