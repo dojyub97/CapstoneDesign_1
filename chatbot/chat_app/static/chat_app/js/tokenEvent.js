@@ -1,3 +1,5 @@
+
+
 // Access Token 갱신 함수
 function refreshAccessToken() {
     const refreshToken = localStorage.getItem('refresh_token');
@@ -46,7 +48,7 @@ export function fetchWithToken(url, options = {}) {
                 ...options.headers,
                 Authorization: `Bearer ${newAccessToken}`,
             };
-            return fetch(url, options);
+            return fetch(`${url}`, options);
         });
     }
 
@@ -55,12 +57,12 @@ export function fetchWithToken(url, options = {}) {
         Authorization: `Bearer ${accessToken}`,
     };
 
-    return fetch(url, options).then(response => {
+    return fetch(`${url}`, options).then(response => {
         if (response.status === 401) {
             // Access Token이 만료된 경우
             return refreshAccessToken().then(newAccessToken => {
                 options.headers.Authorization = `Bearer ${newAccessToken}`;
-                return fetch(url, options);
+                return fetch(`${url}`, options);
             });
         }
         return response;
