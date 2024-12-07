@@ -90,7 +90,6 @@ def generate_response(user_question, class_material):
 
     final_response = (
         f"{response_content}\n"
-        f"{metadata.get('source', '출처 없음')}\n"
     )
 
     print(final_response)  # 터미널에 응답 출력
