@@ -54,6 +54,7 @@ class ChatRoom(models.Model):
     topic_choices = [
         ("school_info", "학교정보"),
         ("textbook", "예상문제"),
+        ("KnuIn", "차세대"),
     ]
     topic = models.CharField(max_length=50, choices=topic_choices, null=False)
 
