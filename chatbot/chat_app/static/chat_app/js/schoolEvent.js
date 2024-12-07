@@ -55,7 +55,6 @@ export function renderSchoolInfo(topic) {
         .catch(error => console.error("Error loading chatroom:", error));
 
     function sendMessage() {
-        console.log(token);
         const chatInputElement = document.getElementById("chat-input");
         const chatInputValue = chatInputElement.value.trim();
         if (chatInputValue === '') return; // 빈 메시지 전송 방지
