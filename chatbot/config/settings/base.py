@@ -35,8 +35,7 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default=None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "chatbotdemo.com"]
+ALLOWED_HOSTS = ['13.125.195.52','localhost', '127.0.0.1', 'chatbotdemo.com']
 
 AUTH_USER_MODEL = "chat_app.User"
 
@@ -77,7 +76,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "https://chatbotdemo",
-    "http://13.125.195.52",
+    "http://13.125.195.52:8000",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 

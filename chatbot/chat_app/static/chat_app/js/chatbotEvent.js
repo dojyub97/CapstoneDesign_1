@@ -16,5 +16,5 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("home-button").addEventListener("click", renderHome);
     document.getElementById("school-button").addEventListener("click", renderSchoolInfo);
     document.getElementById("pdf-button").addEventListener("click", renderPDFGenerator);
-    document.getElementById("차세대-button").addEventListener("click", render차세대);
+    // document.getElementById("차세대-button").addEventListener("click", render차세대);
 });
