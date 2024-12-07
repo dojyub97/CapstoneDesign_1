@@ -1,3 +1,6 @@
+import { fetchWithToken } from "./tokenEvent.js";
+
+
 export function renderSchoolInfo() {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -5,15 +8,13 @@ export function renderSchoolInfo() {
         return;
     }
 
+    console.log(token);
     let topic = "school-info";
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
 
-    fetch(`/api/chatroom/${topic}/`, {
+    fetchWithToken(`/api/chatroom/${topic}/`, {
         method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-        },
     })
         .then(response => response.json())
         .then(data => {
@@ -44,7 +45,6 @@ export function renderSchoolInfo() {
             `;
 
             data.messages.forEach(message => {
-                console.log(message);
                 displayMessage(message.sender, message.text);
             });
             // 중복 로직
@@ -71,11 +71,10 @@ export function renderSchoolInfo() {
         displayMessage("user", chatInputValue);
         chatInputElement.value = "";
 
-        fetch(`/api/chatmessage/school-info/${currentChatroomId}/`, {
+        fetchWithToken(`/api/school-info/${currentChatroomId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({ chatroom_id: currentChatroomId, sender: 'user', text: chatInputValue }),
         })
@@ -108,5 +107,4 @@ export function renderSchoolInfo() {
         messageContainer.appendChild(messageElement);
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
-
 }

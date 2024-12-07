@@ -1,20 +1,12 @@
+import { fetchWithToken } from "./tokenEvent.js";
 
 export function renderPDFGenerator() {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        console.error("No access token found. Please log in again.");
-        return;
-    }
-
     let topic = "pdf-QnA";
     let currentChatroomId = null;
     window.history.pushState({}, '', `/${topic}/`);
 
-    fetch(`/api/chatroom/${topic}/`, {
+    fetchWithToken(`/api/chatroom/${topic}/`, {
         method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-        },
     })
         .then(response => response.json())
         .then(data => {
@@ -22,7 +14,7 @@ export function renderPDFGenerator() {
             // 문제생성 container
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-                <div id="pdf-container" class="flex flex-col flex-grow basis-1/3 min-w-[300px] max-w-[33%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
+                <div id="pdf-container" class="flex flex-col flex-grow basis-1/3 min-w-[400px] overflow-x-hidden bg-gray-100 rounded-lg p-4">
                     <h2 class="text-lg font-bold mb-4 text-gray-700">Upload PDF</h2>
                     <div class="flex flex-col space-y-2 overflow-y-auto border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
                         <label for="pdf-upload" class="block text-gray-500">
@@ -42,8 +34,8 @@ export function renderPDFGenerator() {
                 </div>
 
                 <!-- Chat Section -->
-                <div id="chat-container" class="flex flex-col flex-grow basis-2/3 min-w-[500px] max-w-[67%] overflow-x-hidden bg-gray-100 rounded-lg p-4">
-                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden mb-4 break-words">
+                <div id="chat-container" class="flex flex-col flex-grow basis-2/3 min-w-[700px] overflow-x-hidden bg-gray-100 rounded-lg p-4">
+                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden mb-4 break-words hide-scrollbar">
                         <!-- Messages will appear here dynamically -->
                     </div>
                     <!-- Input section -->
@@ -79,6 +71,7 @@ export function renderPDFGenerator() {
 
         let loadPdf = null;
         let selectedPagesText = {};
+        let fileName = null;
 
         // pdf file upload event
         pdfUploadInput.addEventListener("change", async (event) => {
@@ -87,7 +80,11 @@ export function renderPDFGenerator() {
                 // Label 숨기기
                 pdfLabel.classList.add("hidden");
 
+                // 새로운 PDF를 업로드할 때 selectedPagesText 초기화
+                selectedPagesText = {}; 
+
                 // pdf file read->load
+                fileName = file.name;
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const typeArray = new Uint8Array(e.target.result);
@@ -155,13 +152,20 @@ export function renderPDFGenerator() {
         // Event handling: extracted pdf text + user message handling
         // process page button을 클릭한 후에 사용자 입력을 받을 수 있도록 함
         processPagesButton.addEventListener("click", () => {
+            // 기존 이벤트 리스너 제거
+            processPagesButton.replaceWith(processPagesButton.cloneNode(true))
+
             const checkboxes = pdfPreview.querySelectorAll("input[type='checkbox']:checked");
             const selectedPages = Array.from(checkboxes).map(checkbox => parseInt(checkbox.dataset.page));
+
             if (selectedPages.length === 0) {
                 alert("Please select at least one page to process.");
                 return;
             }
-            const selectedText = selectedPages.map((page) => selectedPagesText[page]).join("\n\n");
+
+            // Set으로 중복 제거 및 텍스트 결합
+            const uniquePages = [...new Set(selectedPages)];
+            const selectedText = uniquePages.map((page) => selectedPagesText[page]).join("\n\n");
 
             // Store extracted text for later API submission
             document.getElementById("send-button").onclick = function () {
@@ -183,11 +187,10 @@ export function renderPDFGenerator() {
                 displayMessage("user", chatInputValue);
                 chatInputElement.value = "";
 
-                fetch(`/api/chatmessage/${topic}/${currentChatroomId}/`, {
+                fetchWithToken(`/api/${topic}/${currentChatroomId}/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
                     },
                     body: JSON.stringify({
                         "chat_data": {
@@ -196,18 +199,22 @@ export function renderPDFGenerator() {
                             "text": chatInputValue
                         },
                         "file_data": {
-                            "file_name": "example.pdf",
+                            "file_name": fileName,
                             "content": selectedText
                         }
                     }),
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
-                        const botMessage = data.bot_message ? data.bot_message.text : "No response from bot.";
-                        displayMessage("Bot", botMessage);
+                        const botMessage = data.sender ? data.text : "No response from bot.";
+                        displayMessage(data.sender, botMessage);
                     })
                     .catch(error => console.error("Error:", error));
+            }
+
+            function convertNewlinesToBr(inputText) {
+                // Replace all \n with <br>
+                return inputText.replace(/\n/g, '<br>');
             }
 
             // display에 chatting message 출력
@@ -215,19 +222,23 @@ export function renderPDFGenerator() {
                 const messageElement = document.createElement("div");
                 const messageContainer = document.getElementById("message-container");
 
+                const output_message=convertNewlinesToBr(message);
+
+
                 if (sender === "user") {
                     messageElement.className = "flex justify-end mb-4";
                     messageElement.innerHTML = `
-                    <div class="mr-2 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)] ">${message}</div>
+                    <div class="mr-2 ml-5 py-3 px-4 bg-indigo-100 text-gray-800 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${output_message}</div>
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">U</div>
                 `;
-                } else {
+                } else if (sender === "system") {
                     messageElement.className = "flex items-start mb-4";
                     messageElement.innerHTML = `
                     <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 text-white">B</div>
-                    <div class="ml-2 py-3 px-4 bg-gray-200 rounded-xl overflow-hidden break-words max-w-[calc(100%-3rem)]">${message}</div>
+                    <div class="ml-2 mr-5 py-3 px-4 bg-gray-200 rounded-xl max-w-[calc(100%-2rem)] break-all overflow-y-auto">${output_message}</div>
                 `;
                 }
+
                 messageContainer.appendChild(messageElement);
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }
