@@ -15,7 +15,7 @@ if not GEMINI_API_KEY:
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
-    max_tokens=200,
+    max_tokens=400,
     timeout=30,
     max_retries=2,
     google_api_key=GEMINI_API_KEY #인증오류관련

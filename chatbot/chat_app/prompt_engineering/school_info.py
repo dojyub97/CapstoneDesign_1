@@ -2,6 +2,13 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import sys
+import os
+
+# 프로젝트 루트 디렉토리를 PYTHONPATH에 추가
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(project_root)
+
 from chat_app.consumers import retrieve_similar_document
 
 def print_intro_message():
@@ -68,7 +75,7 @@ if not GEMINI_API_KEY:
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-pro",
     temperature=0.7,
-    max_tokens=200,
+    max_tokens=400,
     timeout=30,
     max_retries=2,
     google_api_key=GEMINI_API_KEY #인증오류관련
