@@ -14,48 +14,46 @@ export function renderPDFGenerator() {
             // 문제생성 container
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-                <div id="pdf-container" class="flex flex-col flex-grow basis-1/3 min-w-[400px] overflow-x-hidden bg-gray-100 rounded-lg p-4">
+                <div id="pdf-container" class="flex flex-col w-96 h-full bg-gray-100 rounded-lg p-4">
                     <h2 class="text-lg font-bold mb-4 text-gray-700">Upload PDF</h2>
-                    <div class="flex flex-col space-y-2 overflow-y-auto border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
-                        <label for="pdf-upload" class="block text-gray-500">
-                            <i class="fas fa-file-upload text-gray-400 text-3xl mb-2"></i>
+                    <div class="flex flex-col overflow-y-auto border-2 border-dashed border-gray-300 rounded-lg p-2 text-center">
+                        <label for="pdf-upload" class="block text-gray-500 item-center mt-2 cursor-pointer">
+                            <i class="fas fa-file-upload text-gray-400 text-2xl"></i>
                             <span>Upload PDF</span>
                         </label>
                         <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" />
-                        <div id="pdf-preview" class="flex flex-col mt-4 space-y-4 overflow-y-auto">
-                        </div>
-                        <button id="process-pages" class="hidden mt-4 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg border border-gray-200">
-                                Process Selected Pages
+                        <div id="pdf-preview" class="flex flex-col space-y-4 overflow-y-auto hide-scrollbar"></div>
+                        <button id="process-pages" class="hidden mt-4 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg">
+                        Process Pages
                         </button>
-                        <button id="delete-file" class="hidden mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg border border-gray-200">
-                                Delete PDF
+                        <button id="delete-file" class="hidden mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">
+                        Delete PDF
                         </button>
                     </div>
-                </div>
+                    </div>
 
-                <!-- Chat Section -->
-                <div id="chat-container" class="flex flex-col flex-grow basis-2/3 min-w-[700px] overflow-x-hidden bg-gray-100 rounded-lg p-4">
-                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden mb-4 break-words hide-scrollbar">
-                        <!-- Messages will appear here dynamically -->
+                    <!-- Chat Container -->
+                    <div id="chat-container" class="flex flex-col flex-grow max-w-full min-w-[700px] h-full bg-gray-100 rounded-lg p-4">
+                    <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto hide-scrollbar mb-4">
+                        <!-- Messages -->
                     </div>
-                    <!-- Input section -->
-                    <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4 ">
-                        <div class="flex-grow ml-4">
-                            <input id="chat-input" type="text" placeholder="Type a message..." class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+                    <div class="flex flex-row items-center h-16 bg-white w-full px-4 mt-4">
+                        <div class="flex-grow">
+                        <input id="chat-input" type="text" placeholder="Type a message..." class="w-full border rounded-xl pl-4 h-10" />
                         </div>
                         <div class="ml-4">
-                            <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1">
-                                <span>Send</span>
-                                <span class="ml-2">
-                                    <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                </svg>
-                                </span>
-                            </button>
+                        <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-xl">
+                            <span>Send</span>
+                            <span class="ml-2">
+                            <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                            </span>
+                        </button>
                         </div>
                     </div>
+                    </div>
                 </div>
-            </div>
             `;
             setupPDFUpload();
         })
@@ -81,7 +79,7 @@ export function renderPDFGenerator() {
                 pdfLabel.classList.add("hidden");
 
                 // 새로운 PDF를 업로드할 때 selectedPagesText 초기화
-                selectedPagesText = {}; 
+                selectedPagesText = {};
 
                 // pdf file read->load
                 fileName = file.name;
@@ -97,30 +95,43 @@ export function renderPDFGenerator() {
                     // render each pdf page
                     for (let i = 1; i <= loadPdf.numPages; i++) {
                         const currentPage = await loadPdf.getPage(i);
-                        const viewport = currentPage.getViewport({ scale: 0.5 });
+                        const viewport = currentPage.getViewport({ scale: 1.0 });
+
                         // Render canvas
                         const canvas = document.createElement("canvas");
-                        canvas.className = "flex flex-col mb-4 shadow border rounded max-w-full h-auto";
+                        canvas.className = "flex shadow border rounded w-64 h-auto";
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
                         const context = canvas.getContext("2d");
                         await currentPage.render({ canvasContext: context, viewport: viewport }).promise;
+
                         // 파일 미리보기(pdf-preview)
                         const pagePreview = document.createElement("div");
-                        pagePreview.className = "flex items-center justify-between mb-2 border p-2 rounded-lg bg-white ";
+                        pagePreview.className = "flex flex-col items-center mt-4 space-x-1 items-center justify-between border rounded-lg";
+
+                        // 페이지 라벨 생성
                         const pageLabel = document.createElement("label");
-                        pageLabel.className = "flex items-center cursor-pointer";
+                        pageLabel.className = "custom-checkbox";
                         pageLabel.innerHTML = `
-                            <input type="checkbox" class="mr-2" data-page="${i}" />
-                            <span>Page ${i}</span>
+                            <!-- 숨겨진 체크박스 -->
+                            <input type="checkbox" data-page="${i}" />
+                            <!-- 아이콘 및 텍스트 -->
+                            <i class="fa-regular fa-square text-gray-500 fa-lg unchecked "></i>
+                            <i class="fa-solid fa-check-square text-indigo-500 fa-lg checked "></i>
                         `;
-                        pagePreview.appendChild(canvas);
+
+                        // Flexbox에 자식 요소 추가
                         pagePreview.appendChild(pageLabel);
+                        pagePreview.appendChild(canvas);
+                        
+
+                        // pdfPreview에 추가
                         pdfPreview.appendChild(pagePreview);
 
                         // Extract text for selected pages
                         const pageText = await extractPageText(currentPage);
                         selectedPagesText[i] = pageText;
+
                     }
                 };
                 reader.readAsArrayBuffer(file);
@@ -157,6 +168,8 @@ export function renderPDFGenerator() {
 
             const checkboxes = pdfPreview.querySelectorAll("input[type='checkbox']:checked");
             const selectedPages = Array.from(checkboxes).map(checkbox => parseInt(checkbox.dataset.page));
+
+            console.log(selectedPages);
 
             if (selectedPages.length === 0) {
                 alert("Please select at least one page to process.");

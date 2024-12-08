@@ -13,27 +13,28 @@ export function renderSchoolInfo(topic) {
             currentChatroomId = data.chatroom_id;
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-                <div id="chat-container" class="flex flex-col flex-shrink-0 rounded-2xl bg-gray-100 w-full max-w-[900px] p-4 ">
-                    <div id="message-container" class="flex flex-col p-4 break-words w-full max-w-full h-full overflow-y-auto hide-scrollbar ">
-                        <!-- Messages will appear here dynamically -->
+                <!-- Chat Container -->
+                <div id="chat-container" class="flex flex-col flex-shrink-0 w-3/4 min-w-[600px] h-full rounded-2xl bg-gray-100 p-4 overflow-auto">
+                <div id="message-container" class="flex flex-col p-4 h-full overflow-y-auto hide-scrollbar">
+                    <!-- Messages will appear here dynamically -->
+                </div>
+                <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4">
+                    <div class="flex-grow ml-4">
+                    <input id="chat-input" type="text" placeholder="Type a message..." class="w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
                     </div>
-                    <!-- Input section -->
-                    <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 mt-4">
-                        <div class="flex-grow ml-4">
-                            <input id="chat-input" type="text" placeholder="Type a message..." class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
-                        </div>
-                        <div class="ml-4">
-                            <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1">
-                                <span>Send</span>
-                                <span class="ml-2">
-                                    <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
+                    <div class="ml-4">
+                    <button id="send-button" class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1">
+                        <span>Send</span>
+                        <span class="ml-2">
+                        <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        </span>
+                    </button>
                     </div>
                 </div>
+            </div>
+
             `;
 
             data.messages.forEach(message => {
