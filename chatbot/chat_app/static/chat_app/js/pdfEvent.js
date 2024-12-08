@@ -14,7 +14,7 @@ export function renderPDFGenerator() {
             // 문제생성 container
             const mainContainer = document.getElementById("main-container");
             mainContainer.innerHTML = `
-                <div id="pdf-container" class="flex flex-col w-96 h-full bg-gray-100 rounded-lg p-4">
+                <div id="pdf-container" class="flex flex-col w-full h-full bg-gray-100 rounded-lg p-4 transition-all duration-300 ease-in-out">
                     <h2 class="text-lg font-bold mb-4 text-gray-700">Upload PDF</h2>
                     <div class="flex flex-col overflow-y-auto border-2 border-dashed border-gray-300 rounded-lg p-2 text-center">
                         <label for="pdf-upload" class="block text-gray-500 item-center mt-2 cursor-pointer">
@@ -33,7 +33,7 @@ export function renderPDFGenerator() {
                     </div>
 
                     <!-- Chat Container -->
-                    <div id="chat-container" class="flex flex-col flex-grow max-w-full min-w-[700px] h-full bg-gray-100 rounded-lg p-4">
+                    <div id="chat-container" class="hidden flex-col flex-grow min-w-[700px] h-full bg-gray-100 rounded-lg p-4 transition-all duration-300 ease-in-out">
                     <div id="message-container" class="flex flex-col w-full h-full overflow-y-auto hide-scrollbar mb-4">
                         <!-- Messages -->
                     </div>
@@ -99,7 +99,7 @@ export function renderPDFGenerator() {
 
                         // Render canvas
                         const canvas = document.createElement("canvas");
-                        canvas.className = "flex shadow border rounded w-64 h-auto";
+                        canvas.className = "flex shadow border rounded w-full h-auto";
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
                         const context = canvas.getContext("2d");
@@ -123,8 +123,6 @@ export function renderPDFGenerator() {
                         // Flexbox에 자식 요소 추가
                         pagePreview.appendChild(pageLabel);
                         pagePreview.appendChild(canvas);
-                        
-
                         // pdfPreview에 추가
                         pdfPreview.appendChild(pagePreview);
 
@@ -169,8 +167,6 @@ export function renderPDFGenerator() {
             const checkboxes = pdfPreview.querySelectorAll("input[type='checkbox']:checked");
             const selectedPages = Array.from(checkboxes).map(checkbox => parseInt(checkbox.dataset.page));
 
-            console.log(selectedPages);
-
             if (selectedPages.length === 0) {
                 alert("Please select at least one page to process.");
                 return;
@@ -179,6 +175,10 @@ export function renderPDFGenerator() {
             // Set으로 중복 제거 및 텍스트 결합
             const uniquePages = [...new Set(selectedPages)];
             const selectedText = uniquePages.map((page) => selectedPagesText[page]).join("\n\n");
+
+            print(selectedText);
+            
+            loadChatContainer();
 
             // Store extracted text for later API submission
             document.getElementById("send-button").onclick = function () {
@@ -190,6 +190,27 @@ export function renderPDFGenerator() {
                     sendMessage(selectedText);
                 }
             });
+
+            function loadChatContainer() {
+                const pdfContainer = document.getElementById("pdf-container");
+                const chatContainer = document.getElementById("chat-container");
+
+                // 버튼에 로딩 아이콘 추가
+                processPagesButton.innerHTML = `<i class="fa fa-spinner fa-spin mr-2"></i> Processing...`;
+
+                setTimeout(() => {
+                    // PDF Container 너비 조정
+                    pdfContainer.classList.remove("w-full");
+                    pdfContainer.classList.add("w-64");
+
+                    // Chat Container 표시
+                    chatContainer.classList.remove("hidden");
+                    chatContainer.classList.add("flex");
+
+                    // 버튼 상태 복원
+                    processPagesButton.innerHTML = "Process Pages";
+                }, 500); // 0.5초 지연 (예시)
+            }
 
             // send user message
             function sendMessage(selectedText) {

@@ -136,20 +136,18 @@ class SchoolInfoView(APIView):
         try:
             chatroom = ChatRoom.objects.get(id=chatroom_id)
             serializer = ChatMessageSerializer(data=request.data)
-
+            
             if serializer.is_valid():
                 chat_message = serializer.save(chatroom_id=chatroom)
                 input_message = serializer.validated_data.get("text")
 
-                print(chatroom.topic)
+                output_message=""
 
                 # Call prompt-> response bot message
-                if chatroom.topic== "school_info":
-                    message = school_info.generate_response(input_message)
+                if chatroom.topic== "school-info":
+                    output_message = school_info.generate_response(input_message)
                 elif chatroom.topic=="KnuIn":
-                    message = 차세대카테고리찾기.chatbot_rag(input_message)
-
-                output_message = message
+                    output_message = 차세대카테고리찾기.chatbot_rag(input_message)
 
                 print(output_message)
 
