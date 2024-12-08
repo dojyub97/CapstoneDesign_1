@@ -176,8 +176,6 @@ export function renderPDFGenerator() {
             const uniquePages = [...new Set(selectedPages)];
             const selectedText = uniquePages.map((page) => selectedPagesText[page]).join("\n\n");
 
-            print(selectedText);
-            
             loadChatContainer();
 
             // Store extracted text for later API submission
