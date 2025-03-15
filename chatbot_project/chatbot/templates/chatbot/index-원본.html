@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Viewer with Filter Option</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #pdfContainer {
+      width: 90%;
+      margin: 20px auto;
+      max-width: 800px;
+      height: 70vh;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .page-container {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .page-container canvas {
+      width: 100%;
+      height: auto;
+    }
+    #selectedPages {
+      margin: 20px auto;
+      text-align: center;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">PDF Viewer with Filter Option</h1>
+  <input type="file" id="fileInput" accept=".pdf" style="display: block; margin: 20px auto;">
+  <div id="pdfContainer"></div>
+  <div id="selectedPages">
+    <button id="showSelectedPages">Show Selected Pages</button>
+    <button id="showAllPages">Show All Pages</button>
+    <button id="downloadSelected">Download Selected Pages</button>
+    <p id="result"></p>
+  </div>
+
+
+    ================================================
+    <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" id="fileInput">
+    <input type="text" name="selected_pages" placeholder="Enter selected pages (e.g., 1,2,3)">
+    <button type="submit">Upload PDF</button>
+    </form>
+
+    <textarea id="queryInput" placeholder="Ask your question"></textarea>
+    <button id="queryButton">Ask</button>
+
+    <div id="results"></div>
+    ================================================
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const pdfContainer = document.getElementById("pdfContainer");
+    const showSelectedPagesButton = document.getElementById("showSelectedPages");
+    const showAllPagesButton = document.getElementById("showAllPages");
+    const downloadSelectedButton = document.getElementById("downloadSelected");
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    let loadedPdf = null; // 로드된 PDF를 저장
+    let allPagesRendered = []; // 렌더링된 모든 페이지 정보
+
+    // PDF.js 워커 설정
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file && file.type === "application/pdf") {
+        const fileReader = new FileReader();
+
+        fileReader.onload = async function () {
+          const typedArray = new Uint8Array(this.result);
+          loadedPdf = await pdfjsLib.getDocument(typedArray).promise; // PDF 로드
+
+          renderAllPages();
+        };
+
+        fileReader.readAsArrayBuffer(file);
+      } else {
+        alert("Please upload a valid PDF file.");
+      }
+    });
+
+    // 모든 페이지 렌더링
+    async function renderAllPages() {
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered = []; // 렌더링된 페이지 목록 초기화
+
+      for (let pageNum = 1; pageNum <= loadedPdf.numPages; pageNum++) {
+        const page = await loadedPdf.getPage(pageNum);
+
+        // PDF 페이지 뷰포트 설정
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+
+        // 페이지 컨테이너 생성
+        const pageContainer = document.createElement("div");
+        pageContainer.className = "page-container";
+        pageContainer.dataset.pageNum = pageNum; // 페이지 번호 저장
+
+        // 캔버스 생성
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        // 캔버스 크기 설정
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // PDF 렌더링
+        const renderContext = {
+          canvasContext: context,
+          viewport,
+        };
+
+        await page.render(renderContext).promise;
+
+        // 체크박스 추가
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `page-${pageNum}`;
+        checkbox.dataset.pageNum = pageNum;
+
+        const label = document.createElement("label");
+        label.htmlFor = `page-${pageNum}`;
+        label.textContent = ` Page ${pageNum}`;
+
+        // 페이지 컨테이너에 추가
+        pageContainer.appendChild(canvas);
+        pageContainer.appendChild(checkbox);
+        pageContainer.appendChild(label);
+        pdfContainer.appendChild(pageContainer);
+
+        // 렌더링된 페이지 목록에 추가
+        allPagesRendered.push(pageContainer);
+      }
+    }
+
+    // 선택된 페이지만 표시
+    showSelectedPagesButton.addEventListener("click", () => {
+      const checkboxes = document.querySelectorAll("#pdfContainer input[type='checkbox']");
+      const selectedPageNums = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => parseInt(checkbox.dataset.pageNum, 10));
+
+      if (selectedPageNums.length === 0) {
+        alert("No pages selected.");
+        return;
+      }
+
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered.forEach(page => {
+        if (selectedPageNums.includes(parseInt(page.dataset.pageNum, 10))) {
+          pdfContainer.appendChild(page);
+        }
+      });
+    });
+
+    // 모든 페이지 다시 표시
+    showAllPagesButton.addEventListener("click", () => {
+      pdfContainer.innerHTML = ""; // 기존 내용 초기화
+      allPagesRendered.forEach(page => {
+        pdfContainer.appendChild(page);
+      });
+    });
+
+    // 선택한 페이지 다운로드
+    downloadSelectedButton.addEventListener("click", async () => {
+      if (!loadedPdf) {
+        alert("Please upload a PDF file first.");
+        return;
+      }
+
+      const checkboxes = document.querySelectorAll("#pdfContainer input[type='checkbox']");
+      const selectedPageNums = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => parseInt(checkbox.dataset.pageNum, 10));
+
+      if (selectedPageNums.length === 0) {
+        alert("No pages selected.");
+        return;
+      }
+
+      const pdfDoc = await PDFLib.PDFDocument.create();
+      const originalPdfBytes = await loadedPdf.getData(); // 원본 PDF 데이터 가져오기
+      const originalPdfDoc = await PDFLib.PDFDocument.load(originalPdfBytes);
+
+      for (const pageNum of selectedPageNums) {
+        const [copiedPage] = await pdfDoc.copyPages(originalPdfDoc, [pageNum - 1]);
+        pdfDoc.addPage(copiedPage);
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "selected_pages.pdf";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    });
+
+
+    ================================================
+
+    document.getElementById("uploadForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch("/chatbot/upload/", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await response.json();
+        alert(data.message);
+    };
+
+    document.getElementById("queryButton").onclick = async () => {
+        const query = document.getElementById("queryInput").value;
+        const response = await fetch("/chatbot/query/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query }),
+        });
+        const data = await response.json();
+        document.getElementById("results").innerText = JSON.stringify(data.results, null, 2);
+    };
+    ================================================
+
+
+    
+  </script>
+</body>
+</html>
+
+
+
+
